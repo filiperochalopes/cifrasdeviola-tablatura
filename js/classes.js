@@ -27,9 +27,9 @@ const dicionarioNotas = {
 };
 
 class Nota {
-  constructor(notacao, notaNumero) {
+  constructor(notacao, numero) {
     this.notacao = notacao;
-    this.notaNumero = notaNumero || dicionarioNotas[notacao];
+    this.numero = numero || dicionarioNotas[notacao];
   }
 
   /** Captura uma nota pelo seu número */
@@ -58,70 +58,174 @@ class Corda {
   }
 }
 
+class Afinacao {
+  constructor(nome, apelido, cordas) {
+    this.nome = nome;
+    this.apelido = apelido;
+    this.cordas = cordas || [];
+  }
+}
+
 const afinacoes = [
-  {
-    nome: "Cebolão de D",
-    apelido: "D",
-    cordas: [
-      new Corda("D"),
-      new Corda("A"),
-      new Corda("F#"),
-      new Corda("D"),
-      new Corda("A"),
-    ],
-  },
-  {
-    nome: "Cebolão de E",
-    apelido: "E",
-    cordas: [
-      new Corda("E"),
-      new Corda("B"),
-      new Corda("G#"),
-      new Corda("E"),
-      new Corda("B"),
-    ],
-  },
+  new Afinacao("Cebolão de D", "D", [
+    new Corda("D"),
+    new Corda("A"),
+    new Corda("F#"),
+    new Corda("D"),
+    new Corda("A"),
+  ]),
+  new Afinacao("Cebolão de E", "E", [
+    new Corda("E"),
+    new Corda("B"),
+    new Corda("G#"),
+    new Corda("E"),
+    new Corda("B"),
+  ]),
 ];
 
-// Encontrando notas numa tablatura
-new RegExp(
-  "((d+)?h(d+)?)|((d+)?p(d+)?)|(d+(~|v))|((d+)?(/|s)(d+)?)|(d+)",
-  "gi"
-);
+const afinacoesPorApelido = afinacoes.reduce((acc, cur) => {
+  return { ...acc, [cur.apelido]: cur };
+}, {});
+
 // Frases para excluir, pois não fazem parte da tablatura
 new RegExp("riff(.+)", "gi");
 
 class Tablatura {
-  constructor(cordas, notacoes) {
-    (this.cordas = cordas), [];
-    this.notacoes = notacoes || null;
+  constructor(afinacao, notacoes, tablaturaString) {
+    // Afinação que define a ordem das cordas iniciais de criação
+    this.afinacao = afinacao;
+    this.cordas = afinacao.cordas.reduce((acc, cur) => {
+      return { ...acc, [cur.apelido]: cur };
+    }, {});
+    // Notações organizadas por tempo e cordas, as linhas são na verdade em colunas seguindo a sequencia das cordas da presente afinação
+    this.notacoes = notacoes || [];
+    // Raw da tablatura como extraída. Útil para análise e substituição ao trocar de tom ou afinação
+    this.tablaturaString = tablaturaString || [];
+
+    this.init();
+  }
+
+  init() {
+    console.log("Tablatura criada", this);
+  }
+
+  trocarAfinacao() {
+    console.log("Afinação trocada");
+  }
+
+  trocarTom() {
+    console.log("Tom trocado");
   }
 
   /** Extrair linhas de tablatura da cifra */
-  static extrairDaCifra(cifra) {
+  static extrairDaCifra(afinacao, cifra) {
     let tablatura, linhasTablatura;
     const tablaturas = [];
+    const numeroCordas = afinacao.cordas.length;
 
     // Econtrando tablaturas
     const regexLinhaTablatura = new RegExp(/(.+)\|-(.+)/, "gi");
     linhasTablatura = cifra.match(regexLinhaTablatura);
-    console.log(linhasTablatura);
 
-    new Tablatura(
-      [
-        new Corda("E"),
-        new Corda("M"),
-        new Corda("G#"),
-        new Corda("E"),
-        new Corda("B"),
-      ],
-      tablatura
-    );
+    //  Verifica se o número de cordas da afinação bate com as tablaturas  da cifra
+    if (linhasTablatura.length % numeroCordas !== 0) {
+      console.error(
+        "Há uma incompatibilidade entre o número de cordas e o número de tablaturas na cifra"
+      );
+    }
+
+    let linhasTablaturaIndex = 0;
+    for (let i = 0; i < linhasTablatura.length / 5; i++) {
+      //  Cria array de agrupamento de cordas, formando um pacote de tablatura com cinco cordas
+      const tablaturaAtual = new Tablatura(afinacao, []);
+      for (let j = 0; j < numeroCordas; j++) {
+        //  Adiciona as notacoes às linhas
+        tablaturaAtual.tablaturaString.push(
+          linhasTablatura[linhasTablaturaIndex]
+        );
+        linhasTablaturaIndex++;
+      }
+      tablaturas.push(tablaturaAtual);
+    }
 
     $("#tablaturas").text("");
-    linhasTablatura.forEach((tablatura) =>
-      $("#tablaturas").append(`${tablatura}\n`)
-    );
+    // lista com as notações encontradas com a ordem de quem veio primeiro
+    let indexedMatches = [];
+    tablaturas.forEach((tablatura, i) => {
+      let indexedMatchesTablatura = [];
+      tablatura.tablaturaString.forEach((linha, j) => {
+        // Encontrando notas numa tablatura e também textos de estrofe como "Riff 2" para que possa ser excluído
+        const notacaoRegEx = new RegExp(
+          /((\d+)?h(\d+)?)|((\d+)?p(\d+)?)|(\d+(~|v))|((\d+)?(\/|s)(\d+)?)|(\s+?\[.+\]\s)|(\d+)/,
+          "gi"
+        );
+
+        linha = linha.replace(/.+\|/, "");
+        let indexes = [],
+          result;
+        while ((result = notacaoRegEx.exec(linha))) {
+          indexes.push({
+            match: result[0],
+            index: result.index,
+            length: result[0].length,
+            cordaIndex: j,
+            tablaturaIndex: i,
+          });
+        }
+        indexedMatchesTablatura.push(indexes);
+
+        $("#tablaturas").append(`${linha}\n`);
+      });
+
+      indexedMatchesTablatura = indexedMatchesTablatura
+        .reduce((acc, cur) => {
+          return [...acc, ...cur];
+        }, [])
+        .sort((a, b) => (a.index > b.index ? 1 : b.index > a.index ? -1 : 0));
+
+      // A ordem em que os itens devem aparecer, que são, no caso as colunas de notações, ou ainda o tempo da tablatura. No tempo 0 vão as primeiras notas a serem tocadas
+      let ordem = 0;
+      indexedMatchesTablatura.forEach((notacao, k, arr) => {
+        indexedMatchesTablatura.forEach((notacaoAnalisada, l) => {
+          if (k !== l) {
+            if (
+              (notacaoAnalisada.index <= notacao.index + notacao.length - 1 &&
+                notacaoAnalisada.index >= notacao.index) ||
+              notacaoAnalisada.index === notacao.index
+            ) {
+              // O dedilhado das duas notações são ao mesmo tempo
+              if (!notacaoAnalisada.ordem) {
+                arr[l].ordem = ordem;
+              }
+            }
+          }
+        });
+        if (!notacao.ordem) {
+          arr[k].ordem = ordem;
+          ordem++;
+        }
+      });
+
+      // Separa por colunas, ou seja: "ordem"
+      let orderedMatchesTablatura = [];
+      for (let o = 0; o < ordem; o++) {
+        orderedMatchesTablatura.push(
+          indexedMatchesTablatura.filter((match) => match.ordem === o)
+        );
+      }
+
+      // Retirando arrays em branco
+      orderedMatchesTablatura = orderedMatchesTablatura.filter(
+        (match) => match.length > 0
+      );
+      console.log(orderedMatchesTablatura);
+
+      indexedMatches.push(indexedMatchesTablatura);
+      $("#tablaturas").append("\n\n");
+    });
+
+    // Verifica a ordem de tocar cada tecla, se tem notas que coincidem no mesmo tempo
+    // console.log(indexedMatches);
 
     return tablaturas;
   }

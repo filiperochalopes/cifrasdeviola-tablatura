@@ -14,30 +14,34 @@
 </head>
 
 <body>
-    <label for="afinacao">Afinação</label>
-    <select id="afinacao">
-        <option value="E" selected>Cebolão em Mi</option>
-        <option value="D">Cebolão em Ré</option>
-    </select><br />
+    <main>
+        <div id="options">
+            <label for="afinacao">Afinação</label>
+            <select id="afinacao">
+                <option value="E" selected>Cebolão em Mi</option>
+                <option value="D">Cebolão em Ré</option>
+            </select><br />
 
-    <label for="tom">Tom</label>
-    <button type="button">- 1/2 tom</button><input type="text" id="tom" value="E" /><button type="button">+ 1/2
-        tom</button><br /><br />
+            <label for="tom">Tom</label>
+            <button type="button">- 1/2 tom</button><input type="text" id="tom" value="E" /><button type="button">+ 1/2
+                tom</button><br /><br />
 
-    <label for="cifras">Música</label>
-    <select id="cifras">
-        <option value="a_sereia_e_o_nego_dagua" selected>A Sereia e o Nego D'água</option>
-        <option value="a_volta_que_o_mundo_da">A volta que o mundo dá</option>
-        <option value="empreitada_perigosa">Empreitada Perigosa</option>
-        <option value="pagode_em_brasilia">Pagode em Brasília</option>
-        <option value="quando_a_lua_vem_surgindo">Quando a Lua vem surgindo</option>
-    </select><br /><br />
+            <label for="cifras">Música</label>
+            <select id="cifras">
+                <option value="a_sereia_e_o_nego_dagua" selected>A Sereia e o Nego D'água</option>
+                <option value="a_volta_que_o_mundo_da">A volta que o mundo dá</option>
+                <option value="empreitada_perigosa">Empreitada Perigosa</option>
+                <option value="pagode_em_brasilia">Pagode em Brasília</option>
+                <option value="quando_a_lua_vem_surgindo">Quando a Lua vem surgindo</option>
+            </select>
+        </div>
 
-    <h4>Tablaturas extraídas</h4>
-    <pre id="tablaturas"></pre>
+        <h4>Tablaturas extraídas</h4>
+        <pre id="tablaturas"></pre>
 
-    <h4>Cifra</h4>
-    <pre id="cifra"></pre>
+        <h4>Cifra</h4>
+        <pre id="cifra"></pre>
+    </main>
 
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script>
