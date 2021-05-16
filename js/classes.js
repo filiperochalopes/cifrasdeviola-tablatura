@@ -26,6 +26,21 @@ const dicionarioNotas = {
   "B#": 1,
 };
 
+const dicionarioTons = {
+  C: 1,
+  "C#": 2,
+  D: 3,
+  "D#": 4,
+  E: 5,
+  F: 6,
+  "F#": 7,
+  G: 8,
+  Ab: 9,
+  A: 10,
+  Bb: 11,
+  B: 12,
+};
+
 class Nota {
   constructor(notacao, numero) {
     this.notacao = notacao;
@@ -101,6 +116,7 @@ class Tablatura {
     this.notacoes = notacoes || [];
     // Raw da tablatura como extraída. Útil para análise e substituição ao trocar de tom ou afinação
     this.tablaturaString = tablaturaString || [];
+    this.tablaturaStringOriginal = tablaturaString || [];
 
     this.init();
   }
@@ -113,7 +129,7 @@ class Tablatura {
     console.log("Afinação trocada");
   }
 
-  trocarTom() {
+  alterarTom() {
     console.log("Tom trocado");
   }
 

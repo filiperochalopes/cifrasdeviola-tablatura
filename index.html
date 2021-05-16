@@ -23,7 +23,7 @@
             </select><br />
 
             <label for="tom">Tom</label>
-            <button type="button">- 1/2 tom</button><input type="text" id="tom" value="E" /><button type="button">+ 1/2
+            <button type="button" id="reduzir_meio_tom">- 1/2 tom</button><input type="text" id="tom" value="E" /><button type="button" id="aumentar_meio_tom">+ 1/2
                 tom</button><br /><br />
 
             <label for="cifras">Música</label>
@@ -46,8 +46,8 @@
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script>
         let appState = {
-            tom: "D",
-            afinacao: "D",
+            tom: "E",
+            afinacao: "E",
             tablaturas: []
         }
 
