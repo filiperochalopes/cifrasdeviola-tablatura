@@ -9,6 +9,7 @@ $(document).ready(function () {
           afinacoesPorApelido["D"],
           data
         );
+        Tablatura.render();
       },
     });
   }
@@ -58,6 +59,7 @@ $(document).ready(function () {
       novoTom = appState.tom;
     }
     appState.tom = novoTom;
+    appState.tablaturas.forEach((tablatura) => tablatura.alterarTom(novoTom));
     $("input#tom").val(appState.tom);
   });
 

@@ -109,11 +109,10 @@ class Tablatura {
   constructor(afinacao, notacoes, tablaturaString) {
     // Afinação que define a ordem das cordas iniciais de criação
     this.afinacao = afinacao;
-    this.cordas = afinacao.cordas.reduce((acc, cur) => {
-      return { ...acc, [cur.apelido]: cur };
-    }, {});
+    this.cordas = afinacao.cordas;
     // Notações organizadas por tempo e cordas, as linhas são na verdade em colunas seguindo a sequencia das cordas da presente afinação
     this.notacoes = notacoes || [];
+    this.notacoesOriginais = [];
     // Raw da tablatura como extraída. Útil para análise e substituição ao trocar de tom ou afinação
     this.tablaturaString = tablaturaString || [];
     this.tablaturaStringOriginal = tablaturaString || [];
@@ -133,18 +132,77 @@ class Tablatura {
     const numeroTomOriginal = dicionarioTons[appState.tomOriginal],
       numeroTomAtual = dicionarioTons[appState.tom],
       variacaoTom = numeroTomAtual - numeroTomOriginal;
+
+    let notacoesAtuais = [];
+    this.notacoesOriginais.forEach((notacao) => {
+      notacoesAtuais.push({ ...notacao, notacoes: [...notacao.notacoes] });
+    });
+
+    notacoesAtuais.forEach((notacao, i, a) => {
+      const notacoes = notacao.notacoes.map((n) => {
+        let valor = n.valor;
+        if (n.tipo === "nota") {
+          valor = String(parseInt(valor) + variacaoTom);
+        }
+        return { ...n, valor };
+      });
+      a[i] = {
+        ...notacao,
+        match: notacoes.reduce((acc, cur) => [...acc, cur.valor], []).join(""),
+        notacoes,
+      };
+    });
+
+    this.notacoes = notacoesAtuais;
+
+    /** Função que posiciona uma string em um determinado ponto como a tecla INSERT, substituindo caracteres */
+    const replace = (stringToReplace, indexToReplace, string) => {
+      let newString,
+        index = indexToReplace;
+      let stringAsArray = string.split(""),
+        stringToReplaceAsArray = stringToReplace.split("");
+      stringToReplaceAsArray.forEach((stringNumber) => {
+        stringAsArray[index] = stringNumber;
+        index++;
+      });
+      newString = stringAsArray.join("");
+      console.log("replace:", stringToReplace, indexToReplace);
+      console.log("old:", string);
+      console.log("new:", newString);
+      return newString;
+    };
+
+    console.log(this.tablaturaString);
+    this.tablaturaString.forEach((linha, i, a) => {
+      // Em cada linha eu devo substituir as antigas notações pelas novas notações
+      const notasDaCorda = this.notacoes.filter(
+        (notacao) => notacao.cordaIndex === i
+      );
+      let newLinha = linha;
+
+      notasDaCorda.forEach((nota) => {
+        newLinha = replace(nota.match, nota.index, newLinha);
+      });
+
+      a[i] = newLinha;
+    });
+    Tablatura.render();
+
     console.log(
       `Tom trocado. Tom original: ${appState.tomOriginal}, Tom novo: ${appState.tom}, variação de notas: ${variacaoTom}`
     );
   }
 
-  render() {
-    console.log(this.tablaturaStringOriginal);
-    this.tablaturaString.forEach((linha) => {
-      $("#tablaturas").append(linha);
-      $("#tablaturas").append("\n");
+  static render() {
+    // console.log(this.tablaturaStringOriginal);
+    appState.tablaturas.forEach((tablatura, i) => {
+      if (!i) $("#tablaturas").text(""); // Primeira linha "0"
+      tablatura.tablaturaString.forEach((linha, i) => {
+        $("#tablaturas").append(linha);
+        $("#tablaturas").append("\n");
+      });
+      $("#tablaturas").append("\n\n");
     });
-    $("#tablaturas").append("\n\n");
   }
 
   /** Extrair linhas de tablatura da cifra */
@@ -189,7 +247,7 @@ class Tablatura {
           "gi"
         );
 
-        linha = linha.replace(/.+\|/, "");
+        // linha = linha.replace(/.+\|/, "");
         let indexes = [],
           result;
         while ((result = notacaoRegEx.exec(linha))) {
@@ -245,11 +303,49 @@ class Tablatura {
       orderedMatchesTablatura = orderedMatchesTablatura.filter(
         (match) => match.length > 0
       );
+
+      /** Extrai os matches das notações, detalhando mais eles na diferenciação de notas e efeitos */
+      const extrairNotacoes = (string) => {
+        let notas = string.split(/\D/).filter((nota) => nota !== ""),
+          efeitos = string.split(/\d+/).filter((efeito) => efeito !== "");
+
+        // Primeiramente verifica posicionamento dos dígitos
+        notas.forEach((nota, i, a) => {
+          let indexOfString = string.indexOf(nota);
+          a[i] = {
+            valor: nota,
+            tipo: "nota",
+            index: indexOfString,
+          };
+        });
+
+        // Verifica posicionamento dos efeitos
+        efeitos.forEach((efeito, i, a) => {
+          let indexOfString = string.indexOf(efeito);
+          a[i] = {
+            valor: efeito,
+            tipo: "efeito",
+            index: indexOfString,
+          };
+        });
+
+        // Une as notações diferenciando efeitos e notas
+        const notacoes = [...notas, ...efeitos].sort((a, b) =>
+          a.index > b.index ? 1 : b.index > a.index ? -1 : 0
+        );
+
+        return notacoes;
+      };
+
+      // Adiciona as notações com mais detalhes para que possa ser feita as alterações de notas
+      indexedMatchesTablatura.forEach((notacao, i, a) => {
+        a[i] = { ...notacao, notacoes: extrairNotacoes(notacao.match) };
+      });
+
+      tablatura.notacoes = indexedMatchesTablatura;
+      tablatura.notacoesOriginais = indexedMatchesTablatura;
       indexedMatches.push(indexedMatchesTablatura);
     });
-
-    $("#tablaturas").text("");
-    tablaturas.forEach((tablatura) => tablatura.render());
 
     return tablaturas;
   }
