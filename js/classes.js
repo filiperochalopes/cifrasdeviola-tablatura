@@ -122,7 +122,7 @@ class Tablatura {
   }
 
   init() {
-    console.log("Tablatura criada", this);
+    this.tablaturaStringOriginal = this.tablaturaString;
   }
 
   trocarAfinacao() {
@@ -130,7 +130,21 @@ class Tablatura {
   }
 
   alterarTom() {
-    console.log("Tom trocado");
+    const numeroTomOriginal = dicionarioTons[appState.tomOriginal],
+      numeroTomAtual = dicionarioTons[appState.tom],
+      variacaoTom = numeroTomAtual - numeroTomOriginal;
+    console.log(
+      `Tom trocado. Tom original: ${appState.tomOriginal}, Tom novo: ${appState.tom}, variação de notas: ${variacaoTom}`
+    );
+  }
+
+  render() {
+    console.log(this.tablaturaStringOriginal);
+    this.tablaturaString.forEach((linha) => {
+      $("#tablaturas").append(linha);
+      $("#tablaturas").append("\n");
+    });
+    $("#tablaturas").append("\n\n");
   }
 
   /** Extrair linhas de tablatura da cifra */
@@ -164,7 +178,6 @@ class Tablatura {
       tablaturas.push(tablaturaAtual);
     }
 
-    $("#tablaturas").text("");
     // lista com as notações encontradas com a ordem de quem veio primeiro
     let indexedMatches = [];
     tablaturas.forEach((tablatura, i) => {
@@ -189,8 +202,6 @@ class Tablatura {
           });
         }
         indexedMatchesTablatura.push(indexes);
-
-        $("#tablaturas").append(`${linha}\n`);
       });
 
       indexedMatchesTablatura = indexedMatchesTablatura
@@ -234,14 +245,11 @@ class Tablatura {
       orderedMatchesTablatura = orderedMatchesTablatura.filter(
         (match) => match.length > 0
       );
-      console.log(orderedMatchesTablatura);
-
       indexedMatches.push(indexedMatchesTablatura);
-      $("#tablaturas").append("\n\n");
     });
 
-    // Verifica a ordem de tocar cada tecla, se tem notas que coincidem no mesmo tempo
-    // console.log(indexedMatches);
+    $("#tablaturas").text("");
+    tablaturas.forEach((tablatura) => tablatura.render());
 
     return tablaturas;
   }
