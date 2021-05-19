@@ -142,7 +142,40 @@ class Tablatura {
       const notacoes = notacao.notacoes.map((n) => {
         let valor = n.valor;
         if (n.tipo === "nota") {
-          valor = String(parseInt(valor) + variacaoTom);
+          if (
+            parseInt(valor) + variacaoTom >= 0 &&
+            parseInt(valor) + variacaoTom <=
+              this.cordas[notacao.cordaIndex].limiteDeCasas
+          ) {
+            // Caso a nota esteja dentro das casas do braço
+            valor = String(parseInt(valor) + variacaoTom);
+          } else if (parseInt(valor) + variacaoTom < 0) {
+            // Caso o valor esteja abaixo da linha do traste
+            // A nota alvo é dada pela verificação da corda
+            let notaAlvo =
+              this.cordas[notacao.cordaIndex].nota.numero + variacaoTom;
+            notaAlvo = new Nota(
+              Object.entries(dicionarioTons).filter(
+                (tom) => tom[1] === notaAlvo
+              )[0][0]
+            );
+            // TODO Verificar se é possível transpor em corda anterior
+            // Sobe uma oitava
+            valor = String(
+              notaAlvo.numero - this.cordas[notacao.cordaIndex].nota.numero + 12
+            );
+            console.log(
+              this.cordas[notacao.cordaIndex].nota.numero,
+              12,
+              notaAlvo
+            );
+          } else if (
+            parseInt(valor) + variacaoTom >
+            this.cordas[notacao.cordaIndex].limiteDeCasas
+          ) {
+            // Caso o valor esteja acima do limite das casas do braço
+            valor = String(parseInt(valor) + variacaoTom - 12);
+          }
         }
         return { ...n, valor };
       });
@@ -204,8 +237,8 @@ class Tablatura {
         tablaturaString[cordaIndex] = string;
       });
     });
-    
-    this.tablaturaString = tablaturaString
+
+    this.tablaturaString = tablaturaString;
     Tablatura.render();
 
     console.log(
@@ -215,9 +248,10 @@ class Tablatura {
 
   /**
    * Método estático que renderiza as tablaturas
-   * 
+   * Para utilizar a quebra de tablatura, utilizar o
+   * modo='mobile'
    */
-  static render(modo='desktop') {
+  static render(modo = "desktop") {
     // console.log(this.tablaturaStringOriginal);
     appState.tablaturas.forEach((tablatura, i) => {
       if (!i) $("#tablaturas").text(""); // Primeira linha "0"
