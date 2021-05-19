@@ -146,46 +146,66 @@ class Tablatura {
         }
         return { ...n, valor };
       });
+
+      const match = notacoes
+        .reduce((acc, cur) => [...acc, cur.valor], [])
+        .join("");
       a[i] = {
         ...notacao,
-        match: notacoes.reduce((acc, cur) => [...acc, cur.valor], []).join(""),
+        match,
         notacoes,
+        length: match.length,
       };
     });
 
     this.notacoes = notacoesAtuais;
 
-    /** Função que posiciona uma string em um determinado ponto como a tecla INSERT, substituindo caracteres */
-    const replace = (stringToReplace, indexToReplace, string) => {
-      let newString,
-        index = indexToReplace;
-      let stringAsArray = string.split(""),
-        stringToReplaceAsArray = stringToReplace.split("");
-      stringToReplaceAsArray.forEach((stringNumber) => {
-        stringAsArray[index] = stringNumber;
-        index++;
-      });
-      newString = stringAsArray.join("");
-      console.log("replace:", stringToReplace, indexToReplace);
-      console.log("old:", string);
-      console.log("new:", newString);
-      return newString;
-    };
+    let notacoesAtuaisEmColunas = {};
+    // Verificando qual a ultima coluna
+    let ultimaColuna = notacoesAtuais[notacoesAtuais.length - 1].ordem;
+    // Visualizando as notações por colunas
+    for (let i = 0; i <= ultimaColuna; i++) {
+      let coluna = notacoesAtuais.filter((notacao) => notacao.ordem === i);
 
-    console.log(this.tablaturaString);
-    this.tablaturaString.forEach((linha, i, a) => {
-      // Em cada linha eu devo substituir as antigas notações pelas novas notações
-      const notasDaCorda = this.notacoes.filter(
-        (notacao) => notacao.cordaIndex === i
+      if (coluna.length) {
+        notacoesAtuaisEmColunas[i] = coluna;
+      }
+    }
+
+    // Zerando a tablatura
+    let tablaturaString = [];
+    Object.values(notacoesAtuaisEmColunas).forEach((coluna) => {
+      // Verifica qual a notacao de maior tamanho
+      let biggerLength = 0;
+      coluna.forEach((linha) => {
+        if (linha.length > biggerLength) biggerLength = linha.length;
+      });
+      // Organizando as colunas por linhas
+      let notacaoCordas = coluna.reduce(
+        (acc, cur) => ({ ...acc, [cur.cordaIndex]: cur }),
+        {}
       );
-      let newLinha = linha;
-
-      notasDaCorda.forEach((nota) => {
-        newLinha = replace(nota.match, nota.index, newLinha);
+      // console.log(notacaoCordas);
+      this.cordas.forEach((corda, cordaIndex) => {
+        let string;
+        if (tablaturaString[cordaIndex]) {
+          string = tablaturaString[cordaIndex];
+        } else {
+          string = `${corda.nota.notacao.padStart(2, " ")}|`;
+        }
+        if (notacaoCordas[cordaIndex]) {
+          string = `${string}-${notacaoCordas[cordaIndex].match.padEnd(
+            biggerLength,
+            "-"
+          )}-`;
+        } else {
+          string = `${string}-${"".padEnd(biggerLength, "-")}-`;
+        }
+        tablaturaString[cordaIndex] = string;
       });
-
-      a[i] = newLinha;
     });
+    
+    this.tablaturaString = tablaturaString
     Tablatura.render();
 
     console.log(
@@ -193,7 +213,11 @@ class Tablatura {
     );
   }
 
-  static render() {
+  /**
+   * Método estático que renderiza as tablaturas
+   * 
+   */
+  static render(modo='desktop') {
     // console.log(this.tablaturaStringOriginal);
     appState.tablaturas.forEach((tablatura, i) => {
       if (!i) $("#tablaturas").text(""); // Primeira linha "0"

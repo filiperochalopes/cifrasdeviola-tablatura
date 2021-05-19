@@ -6,7 +6,7 @@ $(document).ready(function () {
       success: function (data) {
         $("#cifra").text(data);
         appState.tablaturas = Tablatura.extrairDaCifra(
-          afinacoesPorApelido["D"],
+          afinacoesPorApelido["E"],
           data
         );
         Tablatura.render();
