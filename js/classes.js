@@ -81,6 +81,72 @@ class Afinacao {
   }
 }
 
+class Notacao {
+  /**
+   *
+   * @param {string} match // O match do regex à procura de notações, partindo de uma string escrita em texto corrido
+   * @param {int} index // Em que indexOf da linha o registro deu match, útil na substituição
+   * @param {int} length // tamanho da string match
+   * @param {array} notacoes // string match com mais detalhes, dividido em pequenos objetos que define se é uma nota ou um efeito
+   * @param {int} ordem // coluna em que o match aparece, uma coluna é o momento em que notas devem ser tocadas simultâneamente
+   * @param {int} tablaturaIndex // qual o index da tablatura de appState.tablaturas, essa notação pertence
+   * @param {int} cordaIndex // o index da corda da tablatura que essa notação pertence
+   * @param {string} print // O texto corrigido que deve aparecer por extenso na tablatura
+   */
+  constructor({
+    match,
+    index,
+    length,
+    notacoes,
+    ordem,
+    tablaturaIndex,
+    cordaIndex,
+    print,
+  }) {
+    this.index = index;
+    this.match = match;
+    this.length = length || this.match.length;
+    this.notacoes = notacoes || Notacao.getNotacoes(this.match);
+    this.ordem = ordem;
+    this.tablaturaIndex = tablaturaIndex;
+    this.cordaIndex = cordaIndex;
+    this.print = print || this.match;
+  }
+
+  /** Extrai os matches das notações, detalhando mais eles na diferenciação de notas e efeitos */
+  static getNotacoes(string) {
+    let notas = string.split(/\D/).filter((nota) => nota !== ""),
+      efeitos = string.split(/\d+/).filter((efeito) => efeito !== "");
+
+    // Primeiramente verifica posicionamento dos dígitos
+    notas.forEach((nota, i, a) => {
+      let indexOfString = string.indexOf(nota);
+      a[i] = {
+        valor: nota,
+        tipo: "nota",
+        index: indexOfString,
+      };
+    });
+
+    // Verifica posicionamento dos efeitos
+    efeitos.forEach((efeito, i, a) => {
+      let indexOfString = string.indexOf(efeito);
+      a[i] = {
+        valor: efeito,
+        tipo: "efeito",
+        index: indexOfString,
+      };
+    });
+
+    // Une as notações diferenciando efeitos e notas
+    const notacoes = [...notas, ...efeitos].sort((a, b) =>
+      a.index > b.index ? 1 : b.index > a.index ? -1 : 0
+    );
+
+    return notacoes;
+  }
+}
+
 const afinacoes = [
   new Afinacao("Cebolão de D", "D", [
     new Corda("D"),
@@ -193,52 +259,6 @@ class Tablatura {
 
     this.notacoes = notacoesAtuais;
 
-    let notacoesAtuaisEmColunas = {};
-    // Verificando qual a ultima coluna
-    let ultimaColuna = notacoesAtuais[notacoesAtuais.length - 1].ordem;
-    // Visualizando as notações por colunas
-    for (let i = 0; i <= ultimaColuna; i++) {
-      let coluna = notacoesAtuais.filter((notacao) => notacao.ordem === i);
-
-      if (coluna.length) {
-        notacoesAtuaisEmColunas[i] = coluna;
-      }
-    }
-
-    // Zerando a tablatura
-    let tablaturaString = [];
-    Object.values(notacoesAtuaisEmColunas).forEach((coluna) => {
-      // Verifica qual a notacao de maior tamanho
-      let biggerLength = 0;
-      coluna.forEach((linha) => {
-        if (linha.length > biggerLength) biggerLength = linha.length;
-      });
-      // Organizando as colunas por linhas
-      let notacaoCordas = coluna.reduce(
-        (acc, cur) => ({ ...acc, [cur.cordaIndex]: cur }),
-        {}
-      );
-      // console.log(notacaoCordas);
-      this.cordas.forEach((corda, cordaIndex) => {
-        let string;
-        if (tablaturaString[cordaIndex]) {
-          string = tablaturaString[cordaIndex];
-        } else {
-          string = `${corda.nota.notacao.padStart(2, " ")}|`;
-        }
-        if (notacaoCordas[cordaIndex]) {
-          string = `${string}-${notacaoCordas[cordaIndex].match.padEnd(
-            biggerLength,
-            "-"
-          )}-`;
-        } else {
-          string = `${string}-${"".padEnd(biggerLength, "-")}-`;
-        }
-        tablaturaString[cordaIndex] = string;
-      });
-    });
-
-    this.tablaturaString = tablaturaString;
     Tablatura.render();
 
     console.log(
@@ -252,13 +272,91 @@ class Tablatura {
    * modo='mobile'
    */
   static render(modo = "desktop") {
-    // console.log(this.tablaturaStringOriginal);
     appState.tablaturas.forEach((tablatura, i) => {
       if (!i) $("#tablaturas").text(""); // Primeira linha "0"
-      tablatura.tablaturaString.forEach((linha, i) => {
-        $("#tablaturas").append(linha);
-        $("#tablaturas").append("\n");
+
+      let notacoesAtuaisEmColunas = {};
+      // Verificando qual a ultima coluna
+      let ultimaColuna =
+        tablatura.notacoes[tablatura.notacoes.length - 1].ordem;
+      // Visualizando as notações por colunas
+      for (let i = 0; i <= ultimaColuna; i++) {
+        let coluna = tablatura.notacoes.filter(
+          (notacao) => notacao.ordem === i
+        );
+
+        if (coluna.length) {
+          notacoesAtuaisEmColunas[i] = coluna;
+        }
+      }
+
+      // Zerando a tablatura
+      let tablaturaString = [];
+
+      /**
+       * Foi solicitado que, se tivessem duas notações numa mesma coluna
+       * com slides, sendo que as notações possuissem quantidade de dígitos
+       * diferentes, a barra deveria ser centralizada, ou seja:
+       * 9/12  >>>  9/12
+       * 11/14 >>> 11/14
+       * @param {array} coluna
+       */
+      const alinhamentoSlides = (coluna) => {
+        console.log(coluna);
+        return coluna;
+      };
+      Object.values(notacoesAtuaisEmColunas).forEach((coluna) => {
+        coluna = alinhamentoSlides(coluna);
+        // Verifica qual a notacao de maior tamanho
+        let biggerLength = 0;
+        coluna.forEach((linha) => {
+          if (linha.length > biggerLength) biggerLength = linha.length;
+        });
+        // Organizando as colunas por linhas
+        let notacaoCordas = coluna.reduce(
+          (acc, cur) => ({ ...acc, [cur.cordaIndex]: cur }),
+          {}
+        );
+
+        tablatura.cordas.forEach((corda, cordaIndex) => {
+          let string;
+          if (tablaturaString[cordaIndex]) {
+            string = tablaturaString[cordaIndex];
+          } else {
+            string = `${corda.nota.notacao.padStart(2, " ")}|-`;
+          }
+          if (notacaoCordas[cordaIndex]) {
+            string = `${string}${notacaoCordas[cordaIndex].match.padEnd(
+              biggerLength,
+              "-"
+            )}-`;
+          } else {
+            string = `${string}${"".padEnd(biggerLength, "-")}-`;
+          }
+          tablaturaString[cordaIndex] = string;
+        });
       });
+
+      tablatura.tablaturaString = tablaturaString;
+
+      if (modo === "desktop") {
+        tablatura.tablaturaString.forEach((linha) => {
+          $("#tablaturas").append(linha);
+          $("#tablaturas").append("\n");
+        });
+      } else if (modo === "mobile") {
+        tablatura.tablaturaStringMobile.forEach((bloco) => {
+          bloco.forEach((linha) => {
+            $("#tablaturas").append(linha);
+            $("#tablaturas").append("\n");
+          });
+          $("#tablaturas").append("\n");
+        });
+      } else {
+        $("#tablaturas").append(
+          "Modo de renderização de tablaturas não reconhecido"
+        );
+      }
       $("#tablaturas").append("\n\n");
     });
   }
@@ -305,7 +403,6 @@ class Tablatura {
           "gi"
         );
 
-        // linha = linha.replace(/.+\|/, "");
         let indexes = [],
           result;
         while ((result = notacaoRegEx.exec(linha))) {
@@ -362,42 +459,12 @@ class Tablatura {
         (match) => match.length > 0
       );
 
-      /** Extrai os matches das notações, detalhando mais eles na diferenciação de notas e efeitos */
-      const extrairNotacoes = (string) => {
-        let notas = string.split(/\D/).filter((nota) => nota !== ""),
-          efeitos = string.split(/\d+/).filter((efeito) => efeito !== "");
-
-        // Primeiramente verifica posicionamento dos dígitos
-        notas.forEach((nota, i, a) => {
-          let indexOfString = string.indexOf(nota);
-          a[i] = {
-            valor: nota,
-            tipo: "nota",
-            index: indexOfString,
-          };
-        });
-
-        // Verifica posicionamento dos efeitos
-        efeitos.forEach((efeito, i, a) => {
-          let indexOfString = string.indexOf(efeito);
-          a[i] = {
-            valor: efeito,
-            tipo: "efeito",
-            index: indexOfString,
-          };
-        });
-
-        // Une as notações diferenciando efeitos e notas
-        const notacoes = [...notas, ...efeitos].sort((a, b) =>
-          a.index > b.index ? 1 : b.index > a.index ? -1 : 0
-        );
-
-        return notacoes;
-      };
-
       // Adiciona as notações com mais detalhes para que possa ser feita as alterações de notas
       indexedMatchesTablatura.forEach((notacao, i, a) => {
-        a[i] = { ...notacao, notacoes: extrairNotacoes(notacao.match) };
+        a[i] = new Notacao({
+          ...notacao,
+          notacoes: Notacao.getNotacoes(notacao.match),
+        });
       });
 
       tablatura.notacoes = indexedMatchesTablatura;
