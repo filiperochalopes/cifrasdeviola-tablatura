@@ -1,4 +1,35 @@
 /**
+ * Carlos R. L. Rodrigues
+ * http://jsfromhell.com/array/combine [rev. #1]
+ *
+ * @param {Array} a Array para recombinar
+ * @param {int} q numero de itens no agrupamento
+ */
+function combine(a, q) {
+  var n = a.length - 1,
+    l = n - q + 1,
+    x = 0,
+    c = [],
+    z = -1,
+    p,
+    j,
+    d,
+    i;
+  if (q > n || q < 2) return c;
+  for (p = [], i = q; (p[--i] = i); );
+  while (x <= l) {
+    for (c[++z] = [], j = -1; ++j < q; c[z][j] = a[p[j]]);
+    if (++p[j - 1] > n)
+      while (j--)
+        if ((!j && x++, (d = p[j]) < l + j)) {
+          while (j < q) p[j++] = ++d;
+          break;
+        }
+  }
+  return c;
+}
+
+/**
  * Relação das 12 notas ocidentais, atribuindo o mesmo número
  * a notas equivalentes numa mesma oitava
  */
@@ -79,6 +110,154 @@ class Afinacao {
     this.apelido = apelido;
     this.cordas = cordas || [];
   }
+
+  /**
+   * Verifica se as notas na mesma casa são tocáveis, notas tocáveis são aquelas que estão numa distância máxima de 4 casas
+   * @param {Afinacao} afinacao
+   * @param {array} coluna Array de Notacao
+   */
+  static notasTocaveis(afinacao, coluna, distancaMaxima = 4) {
+    let newColuna = [];
+    if (coluna.length >= 2) {
+      // Notas sendo tocadas juntas
+      // console.log("----------");
+      const notacoesEmColunas = [];
+      // Invertendo matriz de linhas para colunas e guardando em notacoesEmColunas
+      coluna.forEach((notacao, i) => {
+        notacao.notacoes.forEach((detalhe, j) => {
+          if (!notacoesEmColunas[j]) {
+            notacoesEmColunas[j] = [];
+          }
+          // tempId é o Id do item da coluna que ele se encontra, para poder readicionar depois no final dos calculos
+          notacoesEmColunas[j].push({ ...detalhe, tempId: i });
+        });
+      });
+
+      notacoesEmColunas.forEach((colunaNotacaoDetalhada) => {
+        if (
+          colunaNotacaoDetalhada.reduce(
+            (acc, cur) => acc + parseInt(cur.valor),
+            0
+          ) >= 0
+        ) {
+          // Verifica se todos os dígitos da coluna são números
+          const allTheSame = (array) => {
+            const elementValue = array[0].valor;
+            let bool = true;
+            for (let j = 1; j < array.length; j++) {
+              if (parseInt(array[j].valor) !== parseInt(elementValue)) {
+                bool = false;
+                break;
+              }
+            }
+            return bool;
+          };
+
+          const distanciaEntreColunas = (colunaBinaria) =>
+            Math.abs(
+              parseInt(colunaBinaria[0].valor) -
+                parseInt(colunaBinaria[1].valor)
+            );
+
+          const converterCasaParaNota = (notacaoDetalhada) => {
+            console.log(notacaoDetalhada);
+            const calculoBrutoNota =
+              afinacao.cordas[notacaoDetalhada.cordaIndex].nota.numero +
+              parseInt(notacaoDetalhada.valor);
+            if (calculoBrutoNota < 12) {
+              return calculoBrutoNota;
+            } else {
+              return calculoBrutoNota % 12;
+            }
+          };
+
+          const encontrarNotaProximaVazia = (colunaNotacaoDetalhada) => {
+            let cordasVazias = [];
+            afinacao.cordas.forEach((corda, cordaIndex) => {
+              if (
+                coluna.filter((notacao) => notacao.cordaIndex === cordaIndex)
+                  .length === 0
+              ) {
+                cordasVazias.push(corda);
+              }
+            });
+
+            console.log(colunaNotacaoDetalhada);
+            for (let i = 0; i < cordasVazias.length; i++) {
+              // tem que encontrar uma corda onde a nota seja igual à converterCasaParaNota(colunaNotacaoDetalhada[1]) e a distancia para a casa colunaNotacaoDetalhada[0].valor seja menor que a distancia máxima
+
+              // Convertendo uma nota para a casa onde ela fica na corda
+              let casaNaCorda =
+                converterCasaParaNota(colunaNotacaoDetalhada[1]) -
+                cordasVazias[i].nota.numero;
+              if (casaNaCorda < 0) {
+                casaNaCorda += 12;
+              } else if (casaNaCorda > cordasVazias[i].limiteDeCasas) {
+                casaNaCorda -= 12;
+              }
+              // Verifica se a casa encontrada está próxima, se não tiver tenta oitavar
+              if (
+                casaNaCorda <
+                  parseInt(colunaNotacaoDetalhada[0].valor) - distancaMaxima &&
+                casaNaCorda + 12 < cordasVazias[i].limiteDeCasas
+              ) {
+                casaNaCorda += 12;
+              }
+
+              // Verificando se está próximo se estiver próximas as casas para o loop, por isso o for
+              if (
+                casaNaCorda >
+                  colunaNotacaoDetalhada[0].valor - distancaMaxima &&
+                casaNaCorda < colunaNotacaoDetalhada[0].valor + distancaMaxima
+              ) {
+                colunaNotacaoDetalhada[1] = {
+                  ...colunaNotacaoDetalhada[1],
+                  valor: String(casaNaCorda),
+                  cordaIndex: i,
+                };
+              }
+            }
+            console.log(colunaNotacaoDetalhada);
+          };
+
+          if (
+            allTheSame(colunaNotacaoDetalhada) === false &&
+            colunaNotacaoDetalhada.length >= 3
+          ) {
+            // Verifica se todos os números da coluna não são iguais para poupar combinação, só combina se os números forem diferentes
+            const combinacaoDeNotas = combine(colunaNotacaoDetalhada, 2);
+            // Caso na análise não tenha nada que distancie mais do que a distancia máxima de casas, não faz nada
+            let maiorQueDistanciaMaxima = false;
+            // console.log(combinacaoDeNotas);
+          } else if (colunaNotacaoDetalhada.length === 2) {
+            if (
+              distanciaEntreColunas(colunaNotacaoDetalhada) > distancaMaxima
+            ) {
+              encontrarNotaProximaVazia(colunaNotacaoDetalhada);
+              // console.log(colunaNotacaoDetalhada);
+            }
+          }
+
+          colunaNotacaoDetalhada.forEach((notacaoDetalhada) => {
+            const tempId = notacaoDetalhada.tempId;
+            delete notacaoDetalhada.tempId;
+            newColuna[tempId] = {
+              ...coluna[tempId],
+              match: notacaoDetalhada.valor,
+              length: notacaoDetalhada.valor.length,
+              cordaIndex: notacaoDetalhada.cordaIndex,
+              print: notacaoDetalhada.valor,
+              notacoes: [],
+            };
+            newColuna[tempId].notacoes.push(notacaoDetalhada);
+          });
+        }
+      });
+      console.log(newColuna);
+    }
+    if (newColuna.length <= 0) newColuna = coluna;
+    return newColuna;
+  }
 }
 
 class Notacao {
@@ -114,27 +293,29 @@ class Notacao {
   }
 
   /** Extrai os matches das notações, detalhando mais eles na diferenciação de notas e efeitos */
-  static getNotacoes(string) {
-    let notas = string.split(/\D/).filter((nota) => nota !== ""),
-      efeitos = string.split(/\d+/).filter((efeito) => efeito !== "");
+  static getNotacoes(notacao) {
+    let notas = notacao.match.split(/\D/).filter((nota) => nota !== ""),
+      efeitos = notacao.match.split(/\d+/).filter((efeito) => efeito !== "");
 
     // Primeiramente verifica posicionamento dos dígitos
     notas.forEach((nota, i, a) => {
-      let indexOfString = string.indexOf(nota);
+      let indexOfString = notacao.match.indexOf(nota);
       a[i] = {
         valor: nota,
         tipo: "nota",
         index: indexOfString,
+        cordaIndex: notacao.cordaIndex,
       };
     });
 
     // Verifica posicionamento dos efeitos
     efeitos.forEach((efeito, i, a) => {
-      let indexOfString = string.indexOf(efeito);
+      let indexOfString = notacao.match.indexOf(efeito);
       a[i] = {
         valor: efeito,
         tipo: "efeito",
         index: indexOfString,
+        cordaIndex: notacao.cordaIndex,
       };
     });
 
@@ -230,11 +411,6 @@ class Tablatura {
             valor = String(
               notaAlvo.numero - this.cordas[notacao.cordaIndex].nota.numero + 12
             );
-            console.log(
-              this.cordas[notacao.cordaIndex].nota.numero,
-              12,
-              notaAlvo
-            );
           } else if (
             parseInt(valor) + variacaoTom >
             this.cordas[notacao.cordaIndex].limiteDeCasas
@@ -252,6 +428,7 @@ class Tablatura {
       a[i] = {
         ...notacao,
         match,
+        print: match,
         notacoes,
         length: match.length,
       };
@@ -302,10 +479,11 @@ class Tablatura {
        * @param {array} coluna
        */
       const alinhamentoSlides = (coluna) => {
-        console.log(coluna);
         return coluna;
       };
+
       Object.values(notacoesAtuaisEmColunas).forEach((coluna) => {
+        coluna = Afinacao.notasTocaveis(tablatura.afinacao, coluna);
         coluna = alinhamentoSlides(coluna);
         // Verifica qual a notacao de maior tamanho
         let biggerLength = 0;
@@ -326,7 +504,7 @@ class Tablatura {
             string = `${corda.nota.notacao.padStart(2, " ")}|-`;
           }
           if (notacaoCordas[cordaIndex]) {
-            string = `${string}${notacaoCordas[cordaIndex].match.padEnd(
+            string = `${string}${notacaoCordas[cordaIndex].print.padEnd(
               biggerLength,
               "-"
             )}-`;
@@ -463,7 +641,7 @@ class Tablatura {
       indexedMatchesTablatura.forEach((notacao, i, a) => {
         a[i] = new Notacao({
           ...notacao,
-          notacoes: Notacao.getNotacoes(notacao.match),
+          notacoes: Notacao.getNotacoes(notacao),
         });
       });
 
