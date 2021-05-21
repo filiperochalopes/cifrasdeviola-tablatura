@@ -53,7 +53,6 @@ class Afinacao {
             );
 
           const converterCasaParaNota = (notacaoDetalhada) => {
-            console.log(notacaoDetalhada);
             const calculoBrutoNota =
               afinacao.cordas[notacaoDetalhada.cordaIndex].nota.numero +
               parseInt(notacaoDetalhada.valor);
@@ -75,7 +74,6 @@ class Afinacao {
               }
             });
 
-            console.log(colunaNotacaoDetalhada);
             for (let i = 0; i < cordasVazias.length; i++) {
               // tem que encontrar uma corda onde a nota seja igual à converterCasaParaNota(colunaNotacaoDetalhada[1]) e a distancia para a casa colunaNotacaoDetalhada[0].valor seja menor que a distancia máxima
 
@@ -110,7 +108,6 @@ class Afinacao {
                 };
               }
             }
-            console.log(colunaNotacaoDetalhada);
           };
 
           if (
@@ -127,25 +124,8 @@ class Afinacao {
               distanciaEntreColunas(colunaNotacaoDetalhada) > distancaMaxima
             ) {
               encontrarNotaProximaVazia(colunaNotacaoDetalhada);
-              // console.log(colunaNotacaoDetalhada);
             }
           }
-
-          // colunaNotacaoDetalhada.forEach((notacaoDetalhada) => {
-          //   const tempId = notacaoDetalhada.tempId;
-          //   delete notacaoDetalhada.tempId;
-          //   newColuna[tempId] = {
-          //     ...coluna[tempId],
-          //     match: notacaoDetalhada.valor,
-          //     length: notacaoDetalhada.valor.length,
-          //     cordaIndex: notacaoDetalhada.cordaIndex,
-          //     print: notacaoDetalhada.valor,
-          //     notacoes: [],
-          //   };
-          //   newColuna[tempId].notacoes.push(notacaoDetalhada);
-          // });
-        } else {
-          // Caso os digitos não sejam números devem ser adicionados à nova coluna da forma que vieram
         }
         colunaNotacaoDetalhada.forEach((notacaoDetalhada) => {
           const tempId = notacaoDetalhada.tempId;
@@ -162,7 +142,6 @@ class Afinacao {
             notacoes: newColuna[tempId] ? [...newColuna[tempId].notacoes] : [],
           };
           newColuna[tempId].notacoes.push(notacaoDetalhada);
-          console.log(newColuna[tempId]);
         });
       });
     }
@@ -172,12 +151,12 @@ class Afinacao {
         (acc, cur) => `${acc}${cur.valor}`,
         ""
       );
-      a[i] = {
+      a[i] = new Notacao({
         ...linha,
         match,
         length: match.length,
         print: match,
-      };
+      })
     });
     if (newColuna.length <= 0) newColuna = coluna;
     return newColuna;

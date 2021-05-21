@@ -42,6 +42,7 @@ $(document).ready(function () {
     appState.tom = novoTom;
     $("input#tom").val(appState.tom);
     appState.tablaturas.forEach((tablatura) => tablatura.alterarTom(novoTom));
+    Tablatura.render();
   });
   // Alterando tom pelo botão de "Aumentar Meio Tom"
   $("button#aumentar_meio_tom").click(() => {
@@ -56,6 +57,7 @@ $(document).ready(function () {
     appState.tom = novoTom;
     $("input#tom").val(appState.tom);
     appState.tablaturas.forEach((tablatura) => tablatura.alterarTom(novoTom));
+    Tablatura.render();
   });
   // Alterando tom direto pela digitação
   $("input#tom").change((e) => {
@@ -69,6 +71,7 @@ $(document).ready(function () {
     }
     appState.tom = novoTom;
     appState.tablaturas.forEach((tablatura) => tablatura.alterarTom(novoTom));
+    Tablatura.render();
     $("input#tom").val(appState.tom);
   });
 

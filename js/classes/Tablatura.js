@@ -70,18 +70,16 @@ class Tablatura {
       const match = notacoes
         .reduce((acc, cur) => [...acc, cur.valor], [])
         .join("");
-      a[i] = {
+      a[i] = new Notacao({
         ...notacao,
         match,
         print: match,
         notacoes,
         length: match.length,
-      };
+      });
     });
 
     this.notacoes = notacoesAtuais;
-
-    Tablatura.render();
 
     console.log(
       `Tom trocado. Tom original: ${appState.tomOriginal}, Tom novo: ${appState.tom}, variação de notas: ${variacaoTom}`
@@ -94,6 +92,41 @@ class Tablatura {
    * modo='mobile'
    */
   static render(modo = "desktop") {
+    /**
+     * Foi solicitado que, se tivessem duas notações numa mesma coluna
+     * com slides, sendo que as notações possuissem quantidade de dígitos
+     * diferentes, a barra deveria ser centralizada, ou seja:
+     * 9/12  >>>  9/12
+     * 11/14 >>> 11/14
+     * @param {array} coluna
+     */
+    const alinhamentoSlides = (coluna) => {
+      let matchIndex = null,
+        deveAlinhar = false,
+        newColuna = [];
+      coluna.forEach((linha) => {
+        const match = linha.match.match(/\/|s/);
+        if (match && matchIndex !== null && matchIndex !== match.index) {
+          deveAlinhar = true;
+        }
+        if (match) matchIndex = match.index;
+      });
+      if (deveAlinhar) {
+        console.log(coluna);
+        // Verifica qual das notações tem o maior length, assim, todos devem se pasear nele
+        const biggerLength = coluna.sort((a, b) => (a.length < b.length ? 1 : b.length < a.length ? -1 : 0))[0].length
+        coluna.forEach(notacao => {
+          newColuna.push(new Notacao({
+            ...notacao,
+            notacoes: [...notacao.notacoes],
+            print: notacao.match.padStart(biggerLength, "-")
+          }))
+        })
+      }
+      return newColuna.length ? newColuna : coluna;
+    };
+
+
     appState.tablaturas.forEach((tablatura, i) => {
       if (!i) $("#tablaturas").text(""); // Primeira linha "0"
 
@@ -113,23 +146,8 @@ class Tablatura {
       }
 
       // Zerando a tablatura
-      let tablaturaString = [];
-
-      /**
-       * Foi solicitado que, se tivessem duas notações numa mesma coluna
-       * com slides, sendo que as notações possuissem quantidade de dígitos
-       * diferentes, a barra deveria ser centralizada, ou seja:
-       * 9/12  >>>  9/12
-       * 11/14 >>> 11/14
-       * @param {array} coluna
-       */
-      const alinhamentoSlides = (coluna) => {
-        // coluna.forEach(linha => {
-
-        // })
-        // console.log(coluna)
-        return coluna;
-      };
+      let tablaturaString = [],
+        tablaturaStringMobile = [];
 
       Object.values(notacoesAtuaisEmColunas).forEach((coluna) => {
         coluna = Afinacao.notasTocaveis(tablatura.afinacao, coluna);
@@ -147,6 +165,7 @@ class Tablatura {
 
         tablatura.cordas.forEach((corda, cordaIndex) => {
           let string;
+          // Criando strings de renderização inteiras
           if (tablaturaString[cordaIndex]) {
             string = tablaturaString[cordaIndex];
           } else {
@@ -161,10 +180,13 @@ class Tablatura {
             string = `${string}${"".padEnd(biggerLength, "-")}-`;
           }
           tablaturaString[cordaIndex] = string;
+          // Criando blocos de strings para quebra em renderização mobile
+          // tablaturaStringMobile
         });
       });
 
       tablatura.tablaturaString = tablaturaString;
+      tablatura.tablaturaStringMobile = tablaturaStringMobile;
 
       if (modo === "desktop") {
         tablatura.tablaturaString.forEach((linha) => {
