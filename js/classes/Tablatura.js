@@ -52,7 +52,6 @@ class Tablatura {
                 (tom) => tom[1] === notaAlvo
               )[0][0]
             );
-            // TODO Verificar se é possível transpor em corda anterior
             // Sobe uma oitava
             valor = String(
               notaAlvo.numero - this.cordas[notacao.cordaIndex].nota.numero + 12
@@ -125,6 +124,10 @@ class Tablatura {
        * @param {array} coluna
        */
       const alinhamentoSlides = (coluna) => {
+        // coluna.forEach(linha => {
+
+        // })
+        // console.log(coluna)
         return coluna;
       };
 
