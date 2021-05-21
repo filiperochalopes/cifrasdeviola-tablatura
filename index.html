@@ -18,12 +18,11 @@
         <div id="options">
             <label for="afinacao">Afinação</label>
             <select id="afinacao">
-                <option value="E" selected>Cebolão em Mi</option>
-                <option value="D">Cebolão em Ré</option>
             </select><br />
 
             <label for="tom">Tom</label>
-            <button type="button" id="reduzir_meio_tom">- 1/2 tom</button><input type="text" id="tom" value="E" /><button type="button" id="aumentar_meio_tom">+ 1/2
+            <button type="button" id="reduzir_meio_tom">- 1/2 tom</button><input type="text" id="tom"
+                value="E" /><button type="button" id="aumentar_meio_tom">+ 1/2
                 tom</button><br /><br />
 
             <label for="cifras">Música</label>
@@ -44,32 +43,13 @@
     </main>
 
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script>
-        let appState = {
-            tom: "E",
-            tomOriginal: "E",
-            afinacao: "E",
-            afinacaoOriginal: "E",
-            tablaturas: []
-        }
-
-        const tons = {
-            "C": 1,
-            "C#": 2,
-            "D": 3,
-            "D#": 4,
-            "E": 5,
-            "F": 6,
-            "F#": 7,
-            "G": 8,
-            "G#": 9,
-            "A": 10,
-            "A#": 11,
-            "B": 12,
-        }
-
-    </script>
-    <script src="js/classes.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/classes/Nota.js"></script>
+    <script src="js/classes/Corda.js"></script>
+    <script src="js/classes/Afinacao.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/classes/Notacao.js"></script>
+    <script src="js/classes/Tablatura.js"></script>
     <script src="js/main.js"></script>
 </body>
 

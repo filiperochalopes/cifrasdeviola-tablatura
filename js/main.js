@@ -14,6 +14,15 @@ $(document).ready(function () {
     });
   }
 
+  // Populando select de afinações
+  afinacoes.forEach((afinacao) => {
+    $("select#afinacao").append(
+      `<option value="${afinacao.apelido}" ${
+        appState.afinacao === afinacao.apelido ? "selected" : ""
+      }>${afinacao.nome}</option>`
+    );
+  });
+
   // Ao trocar campo select de cifras, popula os dados de cifras
   $("#cifras").change((e) => trocarCifra(e.target.value));
   $("#cifras").change();

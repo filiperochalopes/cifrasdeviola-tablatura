@@ -32,3 +32,44 @@ Notação | Tradução | Explicação
 `~ ou v` | vibrato | fazer um vibrato com a corda com movimentos longitudinais rapidos com a nota pressionada
 `/ ou s` | slide | arrastar o dedo de uma casa para outra
 `x` | | tocar a nota abafada
+
+# Instruções de uso
+
+Primeiramente é necessário importar todos os arquivos de script em sua página: 
+
+```html
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/classes/Nota.js"></script>
+<script src="js/classes/Corda.js"></script>
+<script src="js/classes/Afinacao.js"></script>
+<script src="js/config.js"></script>
+<script src="js/classes/Notacao.js"></script>
+<script src="js/classes/Tablatura.js"></script>
+<script src="js/main.js"></script>
+```
+
+Pode se considerar interessante importar apenas um arquivo, nesse caso considere copiar todos os arquivos importados na ordem em um só arquivo `script.js` e utilize uma ferramenta como https://javascript-minifier.com para minificar o arquivo deixando mais leve de carregar e diminuindo o número de requisições
+
+```html
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="js/script.min.js"></script>
+```
+
+## Configurações
+Para configurações existe um arquivo chamado `config.js`. O estado do app (no caso o estado da cifra/tablaturas e as suas configurações iniciais podem ser feitas por esse arquivo).  
+
+| Variável | Descrição |
+|---|---|
+| `appState` | guarda informações de estado da cifra e armazena as tablaturas |
+| `afinacoes` | Guarda as afinações possíveis, que alimenta o campo select e calcula as tonalidades com base nas cordas de cada afinação |
+
+## Funções importantes
+
+### `Tablatura.extrairDaCifra(Afinacao, string): [Tablatura]`
+
+Utilizado para extrair de uma cifra em string as tablaturas e salvála no `appState.tablaturas` como uma lista de objetos Tablatura
+
+### `Tablatura.render(modo)`
+
+Captura todas as tablaturas da cifra armazenadas em appState.tablaturas e renderiza na tela html. O uso de `modo='mobile'` permite a quebra de tablaturas compridas para melhor legibilidade em dispositivos móveis.
