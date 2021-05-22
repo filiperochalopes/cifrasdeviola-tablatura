@@ -5,6 +5,7 @@ $(document).ready(function () {
       dataType: "text",
       success: function (data) {
         appState.cifraOriginal = data
+        $("#cifra_original").text(appState.cifraOriginal);
         $("#cifra").text(appState.cifraOriginal);
         appState.tablaturas = Tablatura.extrairDaCifra(
           afinacoesPorApelido["E"],

@@ -32,51 +32,59 @@ class Tablatura {
     });
 
     notacoesAtuais.forEach((notacao, i, a) => {
-      const notacoes = notacao.notacoes.map((n) => {
-        let valor = n.valor;
-        if (n.tipo === "nota") {
-          if (
-            parseInt(valor) + variacaoTom >= 0 &&
-            parseInt(valor) + variacaoTom <=
+      if (!notacao.estatico) {
+        const notacoes = notacao.notacoes.map((n) => {
+          let valor = n.valor;
+          if (n.tipo === "nota") {
+            if (
+              parseInt(valor) + variacaoTom >= 0 &&
+              parseInt(valor) + variacaoTom <=
+                this.cordas[notacao.cordaIndex].limiteDeCasas
+            ) {
+              // Caso a nota esteja dentro das casas do braço
+              valor = String(parseInt(valor) + variacaoTom);
+            } else if (parseInt(valor) + variacaoTom < 0) {
+              // Caso o valor esteja abaixo da linha do traste
+              // A nota alvo é dada pela verificação da corda
+              let notaAlvo =
+                this.cordas[notacao.cordaIndex].nota.numero + variacaoTom;
+              notaAlvo = new Nota(
+                Object.entries(dicionarioTons).filter(
+                  (tom) => tom[1] === notaAlvo
+                )[0][0]
+              );
+              // Sobe uma oitava
+              valor = String(
+                notaAlvo.numero -
+                  this.cordas[notacao.cordaIndex].nota.numero +
+                  12
+              );
+            } else if (
+              parseInt(valor) + variacaoTom >
               this.cordas[notacao.cordaIndex].limiteDeCasas
-          ) {
-            // Caso a nota esteja dentro das casas do braço
-            valor = String(parseInt(valor) + variacaoTom);
-          } else if (parseInt(valor) + variacaoTom < 0) {
-            // Caso o valor esteja abaixo da linha do traste
-            // A nota alvo é dada pela verificação da corda
-            let notaAlvo =
-              this.cordas[notacao.cordaIndex].nota.numero + variacaoTom;
-            notaAlvo = new Nota(
-              Object.entries(dicionarioTons).filter(
-                (tom) => tom[1] === notaAlvo
-              )[0][0]
-            );
-            // Sobe uma oitava
-            valor = String(
-              notaAlvo.numero - this.cordas[notacao.cordaIndex].nota.numero + 12
-            );
-          } else if (
-            parseInt(valor) + variacaoTom >
-            this.cordas[notacao.cordaIndex].limiteDeCasas
-          ) {
-            // Caso o valor esteja acima do limite das casas do braço
-            valor = String(parseInt(valor) + variacaoTom - 12);
+            ) {
+              // Caso o valor esteja acima do limite das casas do braço
+              valor = String(parseInt(valor) + variacaoTom - 12);
+            }
           }
-        }
-        return { ...n, valor };
-      });
+          return { ...n, valor };
+        });
 
-      const match = notacoes
-        .reduce((acc, cur) => [...acc, cur.valor], [])
-        .join("");
-      a[i] = new Notacao({
-        ...notacao,
-        match,
-        print: match,
-        notacoes,
-        length: match.length,
-      });
+        const match = notacoes
+          .reduce((acc, cur) => [...acc, cur.valor], [])
+          .join("");
+        a[i] = new Notacao({
+          ...notacao,
+          match,
+          print: match,
+          notacoes,
+          length: match.length,
+        });
+      } else {
+        a[i] = new Notacao({
+          ...notacao,
+        });
+      }
     });
 
     this.notacoes = notacoesAtuais;
@@ -175,14 +183,20 @@ class Tablatura {
           } else {
             string = `${corda.nota.notacao.padStart(2, " ")}|-`;
           }
-
           if (notacaoCordas[cordaIndex]) {
             string = `${string}${notacaoCordas[cordaIndex].print.padEnd(
               biggerLength,
-              "-"
-            )}-`;
+              notacaoCordas[cordaIndex].estatico ? " " : "-"
+            )}${notacaoCordas[cordaIndex].estatico ? " " : "-"}`;
           } else {
-            string = `${string}${"".padEnd(biggerLength, "-")}-`;
+            // Não tem nenhuma notação no registro dessa corda, nessa coluna
+            const temEstaticoNaColuna = coluna.filter(
+              (notacao) => notacao.estatico === true
+            ).length;
+            string = `${string}${"".padEnd(
+              biggerLength,
+              temEstaticoNaColuna ? " " : "-"
+            )}${temEstaticoNaColuna ? " " : "-"}`;
           }
           tablaturaString[cordaIndex] = string;
         });
@@ -251,19 +265,21 @@ class Tablatura {
         new RegExp(escapeRegExp(tablatura.tablaturaStringOriginal[0])),
         "<span>$&"
       );
-      console.log(`/${
-        escapeRegExp(
+      console.log(
+        `/${escapeRegExp(
           tablatura.tablaturaStringOriginal[
             tablatura.tablaturaStringOriginal.length - 1
           ]
-        )}\\s\\n/`)
+        )}\\s\\n/`
+      );
       cifraHtml = cifraHtml.replace(
-        new RegExp(`${
-          escapeRegExp(
+        new RegExp(
+          `${escapeRegExp(
             tablatura.tablaturaStringOriginal[
               tablatura.tablaturaStringOriginal.length - 1
             ]
-          )}\\s\\n`, "s"
+          )}\\s\\n`,
+          "s"
         ),
         "$&</span>"
       );
@@ -319,7 +335,7 @@ class Tablatura {
       tablatura.tablaturaString.forEach((linha, j) => {
         // Encontrando notas numa tablatura e também textos de estrofe como "Riff 2" para que possa ser excluído
         const notacaoRegEx = new RegExp(
-          /((\d+)?h(\d+)?)|((\d+)?p(\d+)?)|(\d+(~|v))|((\d+)?(\/|s)(\d+)?)|(\s+?\[.+\]\s)|(\d+)/,
+          /((\d+)?h(\d+)?)|((\d+)?p(\d+)?)|(\d+(~|v))|((\d+)?(\/|s)(\d+)?)|(\s+?\[.+\]\s)|\(\d+\)|(\d+)|\[.*\]|\(\D+\)/,
           "gi"
         );
 
@@ -381,8 +397,11 @@ class Tablatura {
 
       // Adiciona as notações com mais detalhes para que possa ser feita as alterações de notas
       indexedMatchesTablatura.forEach((notacao, i, a) => {
+        const estatico =
+          notacao.match.match(new RegExp(/\(\D+\)|\[.+\]/)) !== null;
         a[i] = new Notacao({
           ...notacao,
+          estatico,
           notacoes: Notacao.getNotacoes(notacao),
         });
       });
