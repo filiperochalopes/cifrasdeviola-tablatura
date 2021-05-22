@@ -287,7 +287,27 @@ class Tablatura {
 
     $("#cifra").html(cifraHtml);
 
-    // loop em tablaturas para substituir na cifra
+    if (modo === "desktop") {
+      $("#cifra span").each(function (index) {
+        $(this).html(
+          `${appState.tablaturas[index].tablaturaString
+            .map((linha) => `${linha}\n`)
+            .join("")}\n\n`
+        );
+      });
+    } else if (modo === "mobile") {
+      $("#cifra span").each(function (index) {
+        $(this).html(
+          `${appState.tablaturas[index].tablaturaStringMobile.map((bloco) =>
+            `${bloco.map((linha) => `${linha}\n`).join("")}\n`
+          ).join("")}\n\n`
+        );
+      });
+    } else {
+      $("#cifra span").each(function (index) {
+        $(this).html(`Modo de renderização desconhecido\n\n`);
+      });
+    }
   }
 
   /**
