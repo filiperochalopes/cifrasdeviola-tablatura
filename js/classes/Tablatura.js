@@ -249,7 +249,7 @@ class Tablatura {
 
       cifraHtml = cifraHtml.replace(
         new RegExp(escapeRegExp(tablatura.tablaturaStringOriginal[0])),
-        "<span>$&</span>"
+        "<span>$&"
       );
       console.log(`/${
         escapeRegExp(
@@ -265,7 +265,7 @@ class Tablatura {
             ]
           )}\\s\\n`, "s"
         ),
-        "<span>$&</span>"
+        "$&</span>"
       );
     });
 
