@@ -3,7 +3,8 @@ let appState = {
   tomOriginal: "E",
   afinacao: "E",
   afinacaoOriginal: "E",
-  tablaturas: []
+  tablaturas: [],
+  cifraOriginal: "" // Útil para reconhecimento de padrões na hora de fazer a substituição
 }
 
 /**

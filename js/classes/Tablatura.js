@@ -129,6 +129,8 @@ class Tablatura {
       return newColuna.length ? newColuna : coluna;
     };
 
+    let cifraHtml = appState.cifraOriginal;
+
     appState.tablaturas.forEach((tablatura, i) => {
       if (!i) $("#tablaturas").text(""); // Primeira linha "0"
 
@@ -216,26 +218,60 @@ class Tablatura {
       tablatura.tablaturaString = tablaturaString;
       tablatura.tablaturaStringMobile = tablaturaStringMobile;
 
+      let html = "";
       if (modo === "desktop") {
-        tablatura.tablaturaString.forEach((linha) => {
-          $("#tablaturas").append(linha);
-          $("#tablaturas").append("\n");
+        tablatura.tablaturaString.forEach((linha, linhaIndex) => {
+          if (!linhaIndex) html += `<span data-tablatura="${i}">`;
+          html += `${linha}\n`;
         });
+        html += "</span>";
       } else if (modo === "mobile") {
-        tablatura.tablaturaStringMobile.forEach((bloco) => {
-          bloco.forEach((linha) => {
-            $("#tablaturas").append(linha);
-            $("#tablaturas").append("\n");
+        tablatura.tablaturaStringMobile.forEach((bloco, blocoIndex) => {
+          bloco.forEach((linha, linhaIndex) => {
+            if (!linhaIndex)
+              html += `<span data-tablatura="${i}" data-bloco="${blocoIndex}">`;
+            html += `${linha}\n`;
           });
-          $("#tablaturas").append("\n");
+          html += "</span>\n";
         });
       } else {
         $("#tablaturas").append(
           "Modo de renderização de tablaturas não reconhecido"
         );
       }
-      $("#tablaturas").append("\n\n");
+      html += "\n\n";
+
+      $("#tablaturas").append(html);
+
+      const escapeRegExp = (string) => {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      };
+
+      cifraHtml = cifraHtml.replace(
+        new RegExp(escapeRegExp(tablatura.tablaturaStringOriginal[0])),
+        "<span>$&</span>"
+      );
+      console.log(`/${
+        escapeRegExp(
+          tablatura.tablaturaStringOriginal[
+            tablatura.tablaturaStringOriginal.length - 1
+          ]
+        )}\\s\\n/`)
+      cifraHtml = cifraHtml.replace(
+        new RegExp(`${
+          escapeRegExp(
+            tablatura.tablaturaStringOriginal[
+              tablatura.tablaturaStringOriginal.length - 1
+            ]
+          )}\\s\\n`, "s"
+        ),
+        "<span>$&</span>"
+      );
     });
+
+    $("#cifra").html(cifraHtml);
+
+    // loop em tablaturas para substituir na cifra
   }
 
   /**

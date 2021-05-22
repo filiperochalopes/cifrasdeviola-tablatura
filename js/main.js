@@ -4,12 +4,13 @@ $(document).ready(function () {
       url: `examples/${cifra}.txt`,
       dataType: "text",
       success: function (data) {
-        $("#cifra").text(data);
+        appState.cifraOriginal = data
+        $("#cifra").text(appState.cifraOriginal);
         appState.tablaturas = Tablatura.extrairDaCifra(
           afinacoesPorApelido["E"],
           data
         );
-        renderDependingOnWindowSize;
+        renderDependingOnWindowSize();
       },
     });
   }
@@ -23,7 +24,7 @@ $(document).ready(function () {
       Tablatura.render();
     }
   };
-  
+
   window.addEventListener("resize", renderDependingOnWindowSize);
 
   // Populando select de afinações

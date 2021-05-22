@@ -6,6 +6,10 @@
   background: yellow;
 }
 
+#cifra span {
+  background: orange;
+}
+
 main {
   width: 100%;
   max-width: 768px;
