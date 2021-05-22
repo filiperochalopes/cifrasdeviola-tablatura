@@ -4,8 +4,20 @@ let appState = {
   afinacao: "E",
   afinacaoOriginal: "E",
   tablaturas: [],
-  cifraOriginal: "" // Útil para reconhecimento de padrões na hora de fazer a substituição
-}
+  cifraOriginal: "", // Útil para reconhecimento de padrões na hora de fazer a substituição
+};
+
+const renderDependingOnWindowSize = () => {
+  // Get width and height of the window excluding scrollbars
+  const w = document.documentElement.clientWidth;
+  if (w < 340) {
+    Tablatura.render("mobile");
+  } else if (w < 680) {
+    Tablatura.render("mobile", 16);
+  } else {
+    Tablatura.render();
+  }
+};
 
 /**
  * Relação das 12 notas ocidentais, atribuindo o mesmo número
@@ -51,19 +63,19 @@ const dicionarioTons = {
 };
 
 const tons = {
-  "C": 1,
+  C: 1,
   "C#": 2,
-  "D": 3,
+  D: 3,
   "D#": 4,
-  "E": 5,
-  "F": 6,
+  E: 5,
+  F: 6,
   "F#": 7,
-  "G": 8,
+  G: 8,
   "G#": 9,
-  "A": 10,
+  A: 10,
   "A#": 11,
-  "B": 12,
-}
+  B: 12,
+};
 
 const afinacoes = [
   new Afinacao("Cebolão de D", "D", [
@@ -85,4 +97,3 @@ const afinacoes = [
 const afinacoesPorApelido = afinacoes.reduce((acc, cur) => {
   return { ...acc, [cur.apelido]: cur };
 }, {});
-

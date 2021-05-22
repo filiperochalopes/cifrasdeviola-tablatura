@@ -16,16 +16,6 @@ $(document).ready(function () {
     });
   }
 
-  const renderDependingOnWindowSize = () => {
-    // Get width and height of the window excluding scrollbars
-    const w = document.documentElement.clientWidth;
-    if (w < 340) {
-      Tablatura.render("mobile");
-    } else {
-      Tablatura.render();
-    }
-  };
-
   window.addEventListener("resize", renderDependingOnWindowSize);
 
   // Populando select de afinações
@@ -36,6 +26,8 @@ $(document).ready(function () {
       }>${afinacao.nome}</option>`
     );
   });
+  // Setando afinação inicial
+  $("select#afinacao").val(appState.afinacao);
 
   // Ao trocar campo select de cifras, popula os dados de cifras
   $("#cifras").change((e) => trocarCifra(e.target.value));
@@ -89,6 +81,10 @@ $(document).ready(function () {
     $("input#tom").val(appState.tom);
   });
 
-  // Setando afinação inicial
-  $("select#afinacao").val(appState.afinacao);
+  // Alterando afinação pelo select
+  $("#afinacao").change(e => {
+    appState.afinacao = e.target.value
+    appState.tablaturas.forEach(tablatura => tablatura.alterarAfinacao(e.target.value))
+    renderDependingOnWindowSize()    
+  })
 });
