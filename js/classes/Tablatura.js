@@ -91,7 +91,7 @@ class Tablatura {
    * Para utilizar a quebra de tablatura, utilizar o
    * modo='mobile'
    */
-  static render(modo = "desktop") {
+  static render(modo = "desktop", colunasPorLinha = 12) {
     /**
      * Foi solicitado que, se tivessem duas notações numa mesma coluna
      * com slides, sendo que as notações possuissem quantidade de dígitos
@@ -112,20 +112,22 @@ class Tablatura {
         if (match) matchIndex = match.index;
       });
       if (deveAlinhar) {
-        console.log(coluna);
         // Verifica qual das notações tem o maior length, assim, todos devem se pasear nele
-        const biggerLength = coluna.sort((a, b) => (a.length < b.length ? 1 : b.length < a.length ? -1 : 0))[0].length
-        coluna.forEach(notacao => {
-          newColuna.push(new Notacao({
-            ...notacao,
-            notacoes: [...notacao.notacoes],
-            print: notacao.match.padStart(biggerLength, "-")
-          }))
-        })
+        const biggerLength = coluna.sort((a, b) =>
+          a.length < b.length ? 1 : b.length < a.length ? -1 : 0
+        )[0].length;
+        coluna.forEach((notacao) => {
+          newColuna.push(
+            new Notacao({
+              ...notacao,
+              notacoes: [...notacao.notacoes],
+              print: notacao.match.padStart(biggerLength, "-"),
+            })
+          );
+        });
       }
       return newColuna.length ? newColuna : coluna;
     };
-
 
     appState.tablaturas.forEach((tablatura, i) => {
       if (!i) $("#tablaturas").text(""); // Primeira linha "0"
@@ -149,7 +151,7 @@ class Tablatura {
       let tablaturaString = [],
         tablaturaStringMobile = [];
 
-      Object.values(notacoesAtuaisEmColunas).forEach((coluna) => {
+      Object.values(notacoesAtuaisEmColunas).forEach((coluna, colunaIndex) => {
         coluna = Afinacao.notasTocaveis(tablatura.afinacao, coluna);
         coluna = alinhamentoSlides(coluna);
         // Verifica qual a notacao de maior tamanho
@@ -163,14 +165,15 @@ class Tablatura {
           {}
         );
 
+        // Criando strings de renderização inteiras
         tablatura.cordas.forEach((corda, cordaIndex) => {
           let string;
-          // Criando strings de renderização inteiras
           if (tablaturaString[cordaIndex]) {
             string = tablaturaString[cordaIndex];
           } else {
             string = `${corda.nota.notacao.padStart(2, " ")}|-`;
           }
+
           if (notacaoCordas[cordaIndex]) {
             string = `${string}${notacaoCordas[cordaIndex].print.padEnd(
               biggerLength,
@@ -180,8 +183,33 @@ class Tablatura {
             string = `${string}${"".padEnd(biggerLength, "-")}-`;
           }
           tablaturaString[cordaIndex] = string;
-          // Criando blocos de strings para quebra em renderização mobile
-          // tablaturaStringMobile
+        });
+
+        // Criando blocos de strings para quebra em renderização mobile
+        tablatura.cordas.forEach((corda, cordaIndex) => {
+          let string;
+          const indexLinhaQuebrada =
+            Math.ceil((colunaIndex + 1) / colunasPorLinha) - 1;
+
+          if (!tablaturaStringMobile[indexLinhaQuebrada])
+            tablaturaStringMobile[indexLinhaQuebrada] = [];
+
+          if (tablaturaStringMobile[indexLinhaQuebrada][cordaIndex]) {
+            string = tablaturaStringMobile[indexLinhaQuebrada][cordaIndex];
+          } else {
+            string = `${corda.nota.notacao.padStart(2, " ")}|-`;
+          }
+
+          if (notacaoCordas[cordaIndex]) {
+            string = `${string}${notacaoCordas[cordaIndex].print.padEnd(
+              biggerLength,
+              "-"
+            )}-`;
+          } else {
+            string = `${string}${"".padEnd(biggerLength, "-")}-`;
+          }
+
+          tablaturaStringMobile[indexLinhaQuebrada][cordaIndex] = string;
         });
       });
 

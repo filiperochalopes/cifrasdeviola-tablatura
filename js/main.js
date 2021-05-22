@@ -9,10 +9,22 @@ $(document).ready(function () {
           afinacoesPorApelido["E"],
           data
         );
-        Tablatura.render();
+        renderDependingOnWindowSize;
       },
     });
   }
+
+  const renderDependingOnWindowSize = () => {
+    // Get width and height of the window excluding scrollbars
+    const w = document.documentElement.clientWidth;
+    if (w < 340) {
+      Tablatura.render("mobile");
+    } else {
+      Tablatura.render();
+    }
+  };
+  
+  window.addEventListener("resize", renderDependingOnWindowSize);
 
   // Populando select de afinações
   afinacoes.forEach((afinacao) => {
