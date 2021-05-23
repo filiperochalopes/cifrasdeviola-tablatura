@@ -122,11 +122,14 @@ class Tablatura {
               valor = String(parseInt(valor) + variacaoTom);
             } else if (parseInt(valor) + variacaoTom < 0) {
               // Caso o valor esteja abaixo da linha do traste
-              // A nota alvo é dada pela verificação da corda
+              // A nota alvo é dada pela verificação da corda e da variacao do tom
               let notaAlvo =
                 this.cordas[notacao.cordaIndex].nota.numero +
                 parseInt(valor) +
                 variacaoTom;
+              // Mas esse valor pode dar zero, sendo que as notas começam em 1 e terminam em 12, logo:
+              if(notaAlvo <= 0) notaAlvo = 12 + notaAlvo
+              if(notaAlvo > 12) notaAlvo = notaAlvo - 12
               notaAlvo = new Nota(
                 Object.entries(dicionarioTons).filter(
                   (tom) => tom[1] === notaAlvo
