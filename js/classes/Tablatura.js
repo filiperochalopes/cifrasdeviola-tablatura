@@ -19,18 +19,18 @@ class Tablatura {
   }
 
   alterarAfinacao(apelidoAfinacao) {
-    const afinacao = afinacoesPorApelido[apelidoAfinacao]
-    
+    const afinacao = afinacoesPorApelido[apelidoAfinacao];
+
     // restaura tom original
-    appState.tom = appState.tomOriginal
-    $("#tom").val(appState.tom)
+    appState.tom = appState.tomOriginal;
+    $("#tom").val(appState.tom);
 
     afinacao.cordas.forEach((corda, cordaIndex) => {
       const numeroNotaAnterior =
           dicionarioNotas[this.afinacao.cordas[cordaIndex].nota.notacao],
         numeroNotaAtual = dicionarioNotas[corda.nota.notacao],
         variacaoNota = numeroNotaAtual - numeroNotaAnterior;
-        console.log(variacaoNota)
+      console.log(variacaoNota);
 
       this.notacoesOriginaisAfinacao.forEach((notacao, i, a) => {
         if (notacao.cordaIndex === cordaIndex) {
@@ -94,7 +94,7 @@ class Tablatura {
 
     this.afinacao = afinacao;
     this.cordas = this.afinacao.cordas;
-    this.notacoes = this.notacoesOriginaisAfinacao
+    this.notacoes = this.notacoesOriginaisAfinacao;
     console.log("Afinação trocada", this);
   }
 
@@ -124,7 +124,9 @@ class Tablatura {
               // Caso o valor esteja abaixo da linha do traste
               // A nota alvo é dada pela verificação da corda
               let notaAlvo =
-                this.cordas[notacao.cordaIndex].nota.numero + variacaoTom;
+                this.cordas[notacao.cordaIndex].nota.numero +
+                parseInt(valor) +
+                variacaoTom;
               notaAlvo = new Nota(
                 Object.entries(dicionarioTons).filter(
                   (tom) => tom[1] === notaAlvo
@@ -234,13 +236,25 @@ class Tablatura {
         }
       }
 
+      /**
+       * Se tiver na coluna um hammer-on ou pull-off
+       * analisa se estão adequadamente posicionados, isto é,
+       * 5h2 está errado pois o hammer-on é sempre do menor
+       * para o maior e 2p5 está também errado pelo raciocínio
+       * inverso
+       */
+      const hammerOnPullOff = (coluna) => {
+        return coluna;
+      };
+
       // Zerando a tablatura
       let tablaturaString = [],
         tablaturaStringMobile = [];
 
       Object.values(notacoesAtuaisEmColunas).forEach((coluna, colunaIndex) => {
         coluna = Afinacao.notasTocaveis(tablatura.afinacao, coluna);
-        coluna = alinhamentoSlides(coluna);
+        // coluna = hammerOnPullOff(coluna)
+        // coluna = alinhamentoSlides(coluna);
         // Verifica qual a notacao de maior tamanho
         let biggerLength = 0;
         coluna.forEach((linha) => {

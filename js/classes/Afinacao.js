@@ -98,8 +98,8 @@ class Afinacao {
               // Verificando se está próximo se estiver próximas as casas para o loop, por isso o for
               if (
                 casaNaCorda >
-                  colunaNotacaoDetalhada[0].valor - distancaMaxima &&
-                casaNaCorda < colunaNotacaoDetalhada[0].valor + distancaMaxima
+                  parseInt(colunaNotacaoDetalhada[0].valor) - distancaMaxima &&
+                casaNaCorda < parseInt(colunaNotacaoDetalhada[0].valor) + distancaMaxima
               ) {
                 colunaNotacaoDetalhada[1] = {
                   ...colunaNotacaoDetalhada[1],
