@@ -16,6 +16,7 @@ class Tablatura {
 
   init() {
     this.tablaturaStringOriginal = this.tablaturaString;
+    this.notacoesOriginais = this.notacoes
   }
 
   alterarAfinacao(apelidoAfinacao) {
@@ -25,76 +26,91 @@ class Tablatura {
     appState.tom = appState.tomOriginal;
     $("#tom").val(appState.tom);
 
-    afinacao.cordas.forEach((corda, cordaIndex) => {
-      const numeroNotaAnterior =
-          dicionarioNotas[this.afinacao.cordas[cordaIndex].nota.notacao],
-        numeroNotaAtual = dicionarioNotas[corda.nota.notacao],
-        variacaoNota = numeroNotaAtual - numeroNotaAnterior;
-      console.log(variacaoNota);
+    if (apelidoAfinacao !== appState.afinacaoOriginal) {
+      afinacao.cordas.forEach((corda, cordaIndex) => {
+        const numeroNotaAnterior =
+            dicionarioNotas[this.afinacao.cordas[cordaIndex].nota.notacao],
+          numeroNotaAtual = dicionarioNotas[corda.nota.notacao],
+          variacaoNota = numeroNotaAtual - numeroNotaAnterior;
 
-      this.notacoesOriginaisAfinacao.forEach((notacao, i, a) => {
-        if (notacao.cordaIndex === cordaIndex) {
-          // Caso coincida a corda, troca a nota
-          if (!notacao.estatico) {
-            const notacoes = notacao.notacoes.map((n) => {
-              let valor = n.valor;
-              if (n.tipo === "nota") {
-                if (
-                  parseInt(valor) + variacaoNota >= 0 &&
-                  parseInt(valor) + variacaoNota <=
-                    this.cordas[notacao.cordaIndex].limiteDeCasas
-                ) {
-                  // Caso a nota esteja dentro das casas do braço
-                  valor = String(parseInt(valor) + variacaoNota);
-                } else if (parseInt(valor) + variacaoNota < 0) {
-                  // Caso o valor esteja abaixo da linha do traste
-                  // A nota alvo é dada pela verificação da corda
-                  let notaAlvo =
-                    this.cordas[notacao.cordaIndex].nota.numero + variacaoNota;
-                  notaAlvo = new Nota(
-                    Object.entries(dicionarioTons).filter(
-                      (tom) => tom[1] === notaAlvo
-                    )[0][0]
-                  );
-                  // Sobe uma oitava
-                  valor = String(
-                    notaAlvo.numero -
+        this.notacoesOriginaisAfinacao.forEach((notacao, i, a) => {
+          if (notacao.cordaIndex === cordaIndex) {
+            // Caso coincida a corda, troca a nota
+            if (!notacao.estatico) {
+              const notacoes = notacao.notacoes.map((n) => {
+                let valor = n.valor;
+                if (n.tipo === "nota") {
+                  if (
+                    parseInt(valor) + variacaoNota >= 0 &&
+                    parseInt(valor) + variacaoNota <=
+                      this.cordas[notacao.cordaIndex].limiteDeCasas
+                  ) {
+                    // Caso a nota esteja dentro das casas do braço
+                    valor = String(parseInt(valor) + variacaoNota);
+                  } else if (parseInt(valor) + variacaoNota < 0) {
+                    // Caso o valor esteja abaixo da linha do traste
+                    // A nota alvo é dada pela verificação da corda
+                    let notaAlvo =
                       this.cordas[notacao.cordaIndex].nota.numero +
-                      12
-                  );
-                } else if (
-                  parseInt(valor) + variacaoNota >
-                  this.cordas[notacao.cordaIndex].limiteDeCasas
-                ) {
-                  // Caso o valor esteja acima do limite das casas do braço
-                  valor = String(parseInt(valor) + variacaoTom - 12);
+                      variacaoNota;
+                    notaAlvo = new Nota(
+                      Object.entries(dicionarioTons).filter(
+                        (tom) => tom[1] === notaAlvo
+                      )[0][0]
+                    );
+                    // Sobe uma oitava
+                    valor = String(
+                      notaAlvo.numero -
+                        this.cordas[notacao.cordaIndex].nota.numero +
+                        12
+                    );
+                  } else if (
+                    parseInt(valor) + variacaoNota >
+                    this.cordas[notacao.cordaIndex].limiteDeCasas
+                  ) {
+                    // Caso o valor esteja acima do limite das casas do braço
+                    valor = String(parseInt(valor) + variacaoTom - 12);
+                  }
                 }
-              }
-              return { ...n, valor };
-            });
+                return { ...n, valor };
+              });
 
-            const match = notacoes
-              .reduce((acc, cur) => [...acc, cur.valor], [])
-              .join("");
-            a[i] = new Notacao({
-              ...notacao,
-              match,
-              print: match,
-              notacoes,
-              length: match.length,
-            });
-          } else {
-            a[i] = new Notacao({
-              ...notacao,
-            });
+              const match = notacoes
+                .reduce((acc, cur) => [...acc, cur.valor], [])
+                .join("");
+              a[i] = new Notacao({
+                ...notacao,
+                match,
+                print: match,
+                notacoes,
+                length: match.length,
+              });
+            } else {
+              a[i] = new Notacao({
+                ...notacao,
+              });
+            }
           }
-        }
+        });
       });
-    });
+    }
 
     this.afinacao = afinacao;
     this.cordas = this.afinacao.cordas;
-    this.notacoes = this.notacoesOriginaisAfinacao;
+    if (apelidoAfinacao === appState.afinacaoOriginal) {
+      let notacoesOriginaisCopy = [];
+      this.notacoesOriginais.forEach((notacao) => {
+        notacoesOriginaisCopy.push(new Notacao({
+          ...notacao,
+          notacoes: [...notacao.notacoes],
+        }));
+      });
+      this.notacoes = notacoesOriginaisCopy;
+      this.notacoesOriginaisAfinacao = notacoesOriginaisCopy
+      this.notacoes = this.notacoesOriginaisAfinacao;
+    } else {
+      this.notacoes = this.notacoesOriginaisAfinacao;
+    }
     console.log("Afinação trocada", this);
   }
 
@@ -128,8 +144,8 @@ class Tablatura {
                 parseInt(valor) +
                 variacaoTom;
               // Mas esse valor pode dar zero, sendo que as notas começam em 1 e terminam em 12, logo:
-              if(notaAlvo <= 0) notaAlvo = 12 + notaAlvo
-              if(notaAlvo > 12) notaAlvo = notaAlvo - 12
+              if (notaAlvo <= 0) notaAlvo = 12 + notaAlvo;
+              if (notaAlvo > 12) notaAlvo = notaAlvo - 12;
               notaAlvo = new Nota(
                 Object.entries(dicionarioTons).filter(
                   (tom) => tom[1] === notaAlvo
@@ -516,6 +532,14 @@ class Tablatura {
 
       tablatura.notacoes = indexedMatchesTablatura;
       tablatura.notacoesOriginaisAfinacao = indexedMatchesTablatura;
+      let notacoesOriginaisDeepCopy = [];
+      indexedMatchesTablatura.forEach((notacao) => {
+        notacoesOriginaisDeepCopy.push(new Notacao({
+          ...notacao,
+          notacoes: [...notacao.notacoes],
+        }));
+      });
+      tablatura.notacoesOriginais = notacoesOriginaisDeepCopy;
       indexedMatches.push(indexedMatchesTablatura);
     });
 
