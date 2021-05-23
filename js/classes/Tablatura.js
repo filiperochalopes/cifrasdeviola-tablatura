@@ -16,7 +16,7 @@ class Tablatura {
 
   init() {
     this.tablaturaStringOriginal = this.tablaturaString;
-    this.notacoesOriginais = this.notacoes
+    this.notacoesOriginais = this.notacoes;
   }
 
   alterarAfinacao(apelidoAfinacao) {
@@ -100,13 +100,15 @@ class Tablatura {
     if (apelidoAfinacao === appState.afinacaoOriginal) {
       let notacoesOriginaisCopy = [];
       this.notacoesOriginais.forEach((notacao) => {
-        notacoesOriginaisCopy.push(new Notacao({
-          ...notacao,
-          notacoes: [...notacao.notacoes],
-        }));
+        notacoesOriginaisCopy.push(
+          new Notacao({
+            ...notacao,
+            notacoes: [...notacao.notacoes],
+          })
+        );
       });
       this.notacoes = notacoesOriginaisCopy;
-      this.notacoesOriginaisAfinacao = notacoesOriginaisCopy
+      this.notacoesOriginaisAfinacao = notacoesOriginaisCopy;
       this.notacoes = this.notacoesOriginaisAfinacao;
     } else {
       this.notacoes = this.notacoesOriginaisAfinacao;
@@ -263,7 +265,35 @@ class Tablatura {
        * inverso
        */
       const hammerOnPullOff = (coluna) => {
-        return coluna;
+        let newColuna = [];
+        coluna.forEach((notacao) => {
+          if (notacao.match.match(new RegExp(/(\d+p\d+)|(\d+h\d+)/, "g"))) {
+            // Analisa se a notação está correta
+            const numberArray = notacao.match.split(/\D/);
+            let print = notacao.print;
+            if (parseInt(numberArray[0]) > parseInt(numberArray[1])) {
+              print = print.replace(/\D/, "p");
+            } else {
+              print = print.replace(/\D/, "h");
+            }
+
+            newColuna.push(
+              new Notacao({
+                ...notacao,
+                print,
+                notacoes: [...notacao.notacoes],
+              })
+            );
+          } else {
+            newColuna.push(
+              new Notacao({
+                ...notacao,
+                notacoes: [...notacao.notacoes],
+              })
+            );
+          }
+        });
+        return newColuna;
       };
 
       // Zerando a tablatura
@@ -272,8 +302,8 @@ class Tablatura {
 
       Object.values(notacoesAtuaisEmColunas).forEach((coluna, colunaIndex) => {
         coluna = Afinacao.notasTocaveis(tablatura.afinacao, coluna);
-        // coluna = hammerOnPullOff(coluna)
-        // coluna = alinhamentoSlides(coluna);
+        coluna = hammerOnPullOff(coluna);
+        coluna = alinhamentoSlides(coluna);
         // Verifica qual a notacao de maior tamanho
         let biggerLength = 0;
         coluna.forEach((linha) => {
@@ -534,10 +564,12 @@ class Tablatura {
       tablatura.notacoesOriginaisAfinacao = indexedMatchesTablatura;
       let notacoesOriginaisDeepCopy = [];
       indexedMatchesTablatura.forEach((notacao) => {
-        notacoesOriginaisDeepCopy.push(new Notacao({
-          ...notacao,
-          notacoes: [...notacao.notacoes],
-        }));
+        notacoesOriginaisDeepCopy.push(
+          new Notacao({
+            ...notacao,
+            notacoes: [...notacao.notacoes],
+          })
+        );
       });
       tablatura.notacoesOriginais = notacoesOriginaisDeepCopy;
       indexedMatches.push(indexedMatchesTablatura);
