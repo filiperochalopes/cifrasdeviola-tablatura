@@ -73,3 +73,7 @@ Utilizado para extrair de uma cifra em string as tablaturas e salvála no `appSt
 ### `Tablatura.render(modo)`
 
 Captura todas as tablaturas da cifra armazenadas em appState.tablaturas e renderiza na tela html. O uso de `modo='mobile'` permite a quebra de tablaturas compridas para melhor legibilidade em dispositivos móveis.
+
+### `tablatura.alterarTom(notacaoTom)`
+
+Método da instância de `Tablatura`. Altera o da tablatura instanciada de `appState.tomOriginal` para o tom em `notacaoTom`
