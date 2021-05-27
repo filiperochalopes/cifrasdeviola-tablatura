@@ -65,7 +65,14 @@ let dicionarioTons = {
 Object.entries(dicionarioTons).forEach((tom) => {
   dicionarioTons[`${tom[0]}m`] = tom[1];
 });
-console.log(dicionarioTons)
+
+let acordes = [...Object.keys(dicionarioNotas)];
+const variantes = ["m", "m7", "M", "7M"];
+acordes.forEach((acorde) => {
+  variantes.forEach((variante) => {
+    acordes.push(`${acorde}${variante}`);
+  });
+});
 
 const tons = {
   C: 1,
