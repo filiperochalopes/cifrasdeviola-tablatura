@@ -47,7 +47,7 @@ const dicionarioNotas = {
   "B#": 1,
 };
 
-const dicionarioTons = {
+let dicionarioTons = {
   C: 1,
   "C#": 2,
   D: 3,
@@ -56,11 +56,16 @@ const dicionarioTons = {
   F: 6,
   "F#": 7,
   G: 8,
-  Ab: 9,
+  "G#": 9,
   A: 10,
-  Bb: 11,
+  "A#": 11,
   B: 12,
 };
+// Adicionando tons menores
+Object.entries(dicionarioTons).forEach((tom) => {
+  dicionarioTons[`${tom[0]}m`] = tom[1];
+});
+console.log(dicionarioTons)
 
 const tons = {
   C: 1,
