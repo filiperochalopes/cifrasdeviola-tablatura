@@ -237,7 +237,8 @@ class Tablatura {
       return newColuna.length ? newColuna : coluna;
     };
 
-    let cifraHtml = appState.cifraOriginal;
+    let cifraHtml = "",
+      tmpCifraHtml = appState.cifraOriginal;
 
     appState.tablaturas.forEach((tablatura, i) => {
       if (!i) $("#tablaturas").text(""); // Primeira linha "0"
@@ -401,12 +402,12 @@ class Tablatura {
         return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       };
 
-      cifraHtml = cifraHtml.replace(
+      tmpCifraHtml = tmpCifraHtml.replace(
         new RegExp(escapeRegExp(tablatura.tablaturaStringOriginal[0])),
         "<span>$&"
       );
 
-      cifraHtml = cifraHtml.replace(
+      tmpCifraHtml = tmpCifraHtml.replace(
         new RegExp(
           `${escapeRegExp(
             tablatura.tablaturaStringOriginal[
@@ -417,7 +418,17 @@ class Tablatura {
         ),
         "$&</span>"
       );
+
+      // Recorta o texto entre os <span></span> e salva em cifraHtml
+      let startCut = tmpCifraHtml.indexOf("<span>"),
+        endCut = tmpCifraHtml.indexOf("</span>")+7;
+
+      cifraHtml = cifraHtml + tmpCifraHtml.substring(startCut, endCut);
+      tmpCifraHtml = tmpCifraHtml.substring(endCut);
     });
+
+    cifraHtml = cifraHtml+tmpCifraHtml
+    tmpCifraHtml = ''
 
     $("#cifra").html(cifraHtml);
 

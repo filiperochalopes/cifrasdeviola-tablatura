@@ -1,16 +1,35 @@
 $(document).ready(function () {
+  // Populando select de cifras
+  bancoDeCifras.forEach((cifra, i) => {
+    $("select#cifras").append(
+      `<option value="${cifra.nome}" ${i === 0 ? "selected" : ""}>${
+        cifra.nome
+      }</option>`
+    );
+  });
+
   function trocarCifra(cifra) {
+    let cifraSelecionada = bancoDeCifras.filter(
+      (cifraDoBanco) => cifraDoBanco.nome === cifra
+    )[0];
+    appState.tom = cifraSelecionada.tom
+    appState.tomOriginal = cifraSelecionada.tom
+    appState.afinacao = cifraSelecionada.afinacao
+    appState.afinacaoOriginal = cifraSelecionada.afinacao
+    console.log(appState)
+
     $.ajax({
       url: `examples/${cifra}.txt`,
       dataType: "text",
       success: function (data) {
-        appState.cifraOriginal = data
+        appState.cifraOriginal = data;
         $("#cifra_original").text(appState.cifraOriginal);
         $("#cifra").text(appState.cifraOriginal);
         appState.tablaturas = Tablatura.extrairDaCifra(
-          afinacoesPorApelido["E"],
+          afinacoesPorApelido[appState.afinacaoOriginal],
           data
         );
+        console.log(appState)
         renderDependingOnWindowSize();
       },
     });
@@ -26,12 +45,13 @@ $(document).ready(function () {
       }>${afinacao.nome}</option>`
     );
   });
-  // Setando afinação inicial
-  $("select#afinacao").val(appState.afinacao);
 
   // Ao trocar campo select de cifras, popula os dados de cifras
   $("#cifras").change((e) => trocarCifra(e.target.value));
   $("#cifras").change();
+
+  // Setando afinação inicial
+  $("select#afinacao").val(appState.afinacao);
 
   // Regulagem de tons, preenchendo tom principal
   $("input#tom").val(appState.tom);
@@ -82,9 +102,11 @@ $(document).ready(function () {
   });
 
   // Alterando afinação pelo select
-  $("#afinacao").change(e => {
-    appState.afinacao = e.target.value
-    appState.tablaturas.forEach(tablatura => tablatura.alterarAfinacao(e.target.value))
-    renderDependingOnWindowSize()    
-  })
+  $("#afinacao").change((e) => {
+    appState.afinacao = e.target.value;
+    appState.tablaturas.forEach((tablatura) =>
+      tablatura.alterarAfinacao(e.target.value)
+    );
+    renderDependingOnWindowSize();
+  });
 });

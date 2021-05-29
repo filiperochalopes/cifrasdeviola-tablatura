@@ -1,3 +1,36 @@
+let bancoDeCifras = [
+  {
+    tom: "Am",
+    nome: "boate_azul",
+    afinacao: "D"
+  },
+  {
+    tom: "E",
+    nome: "a_sereia_e_o_nego_dagua",
+    afinacao: "E"
+  },
+  {
+    tom: "E",
+    nome: "a_volta_que_o_mundo_da",
+    afinacao: "E"
+  },
+  {
+    tom: "E",
+    nome: "empreitada_perigosa",
+    afinacao: "E"
+  },
+  {
+    tom: "E",
+    nome: "pagode_em_brasilia",
+    afinacao: "E"
+  },
+  {
+    tom: "E",
+    nome: "quando_a_lua_vem_surgindo",
+    afinacao: "E"
+  }
+]
+
 let appState = {
   tom: "E",
   tomOriginal: "E",
@@ -61,6 +94,7 @@ let dicionarioTons = {
   "A#": 11,
   B: 12,
 };
+
 // Adicionando tons menores
 Object.entries(dicionarioTons).forEach((tom) => {
   dicionarioTons[`${tom[0]}m`] = tom[1];
