@@ -1,5 +1,7 @@
 class Tablatura {
-  constructor(afinacao, notacoes, tablaturaString) {
+  constructor(afinacao, notacoes, tablaturaString, linha) {
+    // Linha onde fica a tablatura, permite que seja ordenada juntamento com as cifras
+    this.linha = linha || 0;
     // Afinação que define a ordem das cordas iniciais de criação
     this.afinacao = afinacao;
     this.afinacaoOriginal = afinacao;
@@ -154,11 +156,13 @@ class Tablatura {
                 )[0][0]
               );
               // Sobe uma oitava
-              valor = String(
+              valor =
                 notaAlvo.numero -
-                  this.cordas[notacao.cordaIndex].nota.numero +
-                  12
-              );
+                this.cordas[notacao.cordaIndex].nota.numero +
+                12;
+              if (valor > this.cordas[notacao.cordaIndex].limiteDeCasas)
+                valor -= 12;
+              valor = String(valor);
             } else if (
               parseInt(valor) + variacaoTom >
               this.cordas[notacao.cordaIndex].limiteDeCasas
@@ -402,18 +406,19 @@ class Tablatura {
         return string.replace(/[.*+?^${}()\/\|\[\]\\]/g, "\\$&");
       };
 
-      
-      console.log(escapeRegExp(tablatura.tablaturaStringOriginal[0]))
+      console.log(escapeRegExp(tablatura.tablaturaStringOriginal[0]));
       tmpCifraHtml = tmpCifraHtml.replace(
         new RegExp(escapeRegExp(tablatura.tablaturaStringOriginal[0])),
         "<span>$&"
       );
 
-      console.log(escapeRegExp(
-        tablatura.tablaturaStringOriginal[
-          tablatura.tablaturaStringOriginal.length - 1
-        ]
-      ))
+      console.log(
+        escapeRegExp(
+          tablatura.tablaturaStringOriginal[
+            tablatura.tablaturaStringOriginal.length - 1
+          ]
+        )
+      );
       tmpCifraHtml = tmpCifraHtml.replace(
         new RegExp(
           `${escapeRegExp(
@@ -428,14 +433,14 @@ class Tablatura {
 
       // Recorta o texto entre os <span></span> e salva em cifraHtml
       let startCut = tmpCifraHtml.indexOf("<span>"),
-        endCut = tmpCifraHtml.indexOf("</span>")+7;
+        endCut = tmpCifraHtml.indexOf("</span>") + 7;
 
       cifraHtml = cifraHtml + tmpCifraHtml.substring(startCut, endCut);
       tmpCifraHtml = tmpCifraHtml.substring(endCut);
     });
 
-    cifraHtml = cifraHtml+tmpCifraHtml
-    tmpCifraHtml = ''
+    cifraHtml = cifraHtml + tmpCifraHtml;
+    tmpCifraHtml = "";
 
     $("#cifra").html(cifraHtml);
 
