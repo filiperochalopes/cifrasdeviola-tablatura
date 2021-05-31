@@ -1,5 +1,15 @@
 let bancoDeCifras = [
   {
+    tom: "D",
+    nome: "cubanita",
+    afinacao: "D"
+  },
+  {
+    tom: "A",
+    nome: "panela_velha",
+    afinacao: "D"
+  },
+  {
     tom: "Am",
     nome: "boate_azul",
     afinacao: "D"

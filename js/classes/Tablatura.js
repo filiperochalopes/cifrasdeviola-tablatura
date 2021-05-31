@@ -399,21 +399,28 @@ class Tablatura {
       $("#tablaturas").append(html);
 
       const escapeRegExp = (string) => {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        return string.replace(/[.*+?^${}()\/\|\[\]\\]/g, "\\$&");
       };
 
+      
+      console.log(escapeRegExp(tablatura.tablaturaStringOriginal[0]))
       tmpCifraHtml = tmpCifraHtml.replace(
         new RegExp(escapeRegExp(tablatura.tablaturaStringOriginal[0])),
         "<span>$&"
       );
 
+      console.log(escapeRegExp(
+        tablatura.tablaturaStringOriginal[
+          tablatura.tablaturaStringOriginal.length - 1
+        ]
+      ))
       tmpCifraHtml = tmpCifraHtml.replace(
         new RegExp(
           `${escapeRegExp(
             tablatura.tablaturaStringOriginal[
               tablatura.tablaturaStringOriginal.length - 1
             ]
-          )}\\s\\n`,
+          )}\\s\\s`,
           "s"
         ),
         "$&</span>"
