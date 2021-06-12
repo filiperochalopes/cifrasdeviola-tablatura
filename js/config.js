@@ -2,44 +2,44 @@ let bancoDeCifras = [
   {
     tom: "A",
     nome: "panela_velha",
-    afinacao: "D"
+    afinacao: "D",
   },
   {
     tom: "D",
     nome: "cubanita",
-    afinacao: "D"
+    afinacao: "D",
   },
   {
     tom: "Am",
     nome: "boate_azul",
-    afinacao: "D"
+    afinacao: "D",
   },
   {
     tom: "E",
     nome: "a_sereia_e_o_nego_dagua",
-    afinacao: "E"
+    afinacao: "E",
   },
   {
     tom: "E",
     nome: "a_volta_que_o_mundo_da",
-    afinacao: "E"
+    afinacao: "E",
   },
   {
     tom: "E",
     nome: "empreitada_perigosa",
-    afinacao: "E"
+    afinacao: "E",
   },
   {
     tom: "E",
     nome: "pagode_em_brasilia",
-    afinacao: "E"
+    afinacao: "E",
   },
   {
     tom: "E",
     nome: "quando_a_lua_vem_surgindo",
-    afinacao: "E"
-  }
-]
+    afinacao: "E",
+  },
+];
 
 let appState = {
   tom: "E",
@@ -111,12 +111,20 @@ Object.entries(dicionarioTons).forEach((tom) => {
 });
 
 let acordes = [...Object.keys(dicionarioNotas)];
-const variantes = ["m", "m7", "M", "7M"];
+// Adicionando variantes de notas
+const variantes = ["7", "m", "m7", "m7(b5)", "M", "maj7", "M7"];
 acordes.forEach((acorde) => {
   variantes.forEach((variante) => {
     acordes.push(`${acorde}${variante}`);
   });
 });
+// Adicionando baixos
+acordes.forEach((acorde) => {
+  dicionarioNotas.forEach((baixo) => {
+    acordes.push(`${acorde}/${baixo}`);
+  });
+});
+console.log(arcordes);
 
 const tons = {
   C: 1,
