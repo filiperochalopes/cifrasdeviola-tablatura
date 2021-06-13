@@ -12,11 +12,10 @@ $(document).ready(function () {
     let cifraSelecionada = bancoDeCifras.filter(
       (cifraDoBanco) => cifraDoBanco.nome === cifra
     )[0];
-    appState.tom = cifraSelecionada.tom
-    appState.tomOriginal = cifraSelecionada.tom
-    appState.afinacao = cifraSelecionada.afinacao
-    appState.afinacaoOriginal = cifraSelecionada.afinacao
-    console.log(appState)
+    appState.tom = cifraSelecionada.tom;
+    appState.tomOriginal = cifraSelecionada.tom;
+    appState.afinacao = cifraSelecionada.afinacao;
+    appState.afinacaoOriginal = cifraSelecionada.afinacao;
 
     $.ajax({
       url: `examples/${cifra}.txt`,
@@ -29,7 +28,11 @@ $(document).ready(function () {
           afinacoesPorApelido[appState.afinacaoOriginal],
           data
         );
-        console.log(appState)
+        appState.cifras = Cifra.extrairDaCifra(
+          afinacoesPorApelido[appState.afinacaoOriginal],
+          data
+        );
+        appState.linhas = checkCifraLines(data);
         renderDependingOnWindowSize();
       },
     });

@@ -1,5 +1,5 @@
 class Tablatura {
-  constructor(afinacao, notacoes, tablaturaString, linha) {
+  constructor({ afinacao, notacoes, tablaturaString, linha }) {
     // Linha onde fica a tablatura, permite que seja ordenada juntamento com as cifras
     this.linha = linha || 0;
     // Afinação que define a ordem das cordas iniciais de criação
@@ -402,23 +402,11 @@ class Tablatura {
 
       $("#tablaturas").append(html);
 
-      const escapeRegExp = (string) => {
-        return string.replace(/[.*+?^${}()\/\|\[\]\\]/g, "\\$&");
-      };
-
-      console.log(escapeRegExp(tablatura.tablaturaStringOriginal[0]));
       tmpCifraHtml = tmpCifraHtml.replace(
         new RegExp(escapeRegExp(tablatura.tablaturaStringOriginal[0])),
         "<span>$&"
       );
 
-      console.log(
-        escapeRegExp(
-          tablatura.tablaturaStringOriginal[
-            tablatura.tablaturaStringOriginal.length - 1
-          ]
-        )
-      );
       tmpCifraHtml = tmpCifraHtml.replace(
         new RegExp(
           `${escapeRegExp(
@@ -484,6 +472,13 @@ class Tablatura {
     const regexLinhaTablatura = new RegExp(/(.+)\|-(.+)/, "gi");
     linhasTablatura = cifra.match(regexLinhaTablatura);
 
+    // Verificando e adicionando as linhas das tablaturas para seguir a ordem de renderização posteriormente
+    const indexesLinhasTablatura = [];
+    let match;
+    while ((match = regexLinhaTablatura.exec(cifra)) != null) {
+      indexesLinhasTablatura.push(match.index);
+    }
+
     //  Verifica se o número de cordas da afinação bate com as tablaturas  da cifra
     if (linhasTablatura.length % numeroCordas !== 0) {
       console.error(
@@ -494,12 +489,15 @@ class Tablatura {
     let linhasTablaturaIndex = 0;
     for (let i = 0; i < linhasTablatura.length / 5; i++) {
       //  Cria array de agrupamento de cordas, formando um pacote de tablatura com cinco cordas
-      const tablaturaAtual = new Tablatura(afinacao, []);
+      const tablaturaAtual = new Tablatura({ afinacao });
       for (let j = 0; j < numeroCordas; j++) {
         //  Adiciona as notacoes às linhas
         tablaturaAtual.tablaturaString.push(
           linhasTablatura[linhasTablaturaIndex]
         );
+        if (j === 0) {
+          tablaturaAtual.linha = indexesLinhasTablatura[linhasTablaturaIndex];
+        }
         linhasTablaturaIndex++;
       }
       tablaturas.push(tablaturaAtual);

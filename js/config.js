@@ -47,11 +47,57 @@ let appState = {
   afinacao: "E",
   afinacaoOriginal: "E",
   tablaturas: [],
+  cifras: [],
   cifraOriginal: "", // Útil para reconhecimento de padrões na hora de fazer a substituição
+  linhas: [],
+};
+
+const checkCifraLines = (cifra) => {
+  const cifrasByLine = cifra.split("\n"),
+    linesDescription = [];
+  cifrasByLine.forEach((line, index) => {
+    linesDescription.push({
+      length: line.length,
+      order: index,
+      start: index - 1 >= 0 ? linesDescription[index - 1].end + 1 : 0,
+      end:
+        index - 1 >= 0
+          ? linesDescription[index - 1].end + 1 + line.length
+          : line.length,
+    });
+  });
+  return linesDescription;
 };
 
 const renderDependingOnWindowSize = () => {
   // Get width and height of the window excluding scrollbars
+
+  /**
+   *
+   * @param {string} mode "mobile" or "" Modo de exibição com ou sem quebra de linhas
+   * @param {int} tablaturaNum Número de notações por linha
+   * @param {int} cifraChar Número de caracteres por linha na cifra
+   */
+  const render = (mode, tablaturaNum, cifraChar) => {
+    // Verifica quem vem primeiro ordenando instancias de Cifra e Tablatura pela linha
+    const instanciasTablaturaCifra = [
+      ...appState.tablaturas,
+      ...appState.cifras,
+    ].sort((a, b) => (a.linha > b.linha ? 1 : b.linha > a.linha ? -1 : 0));
+    let cifraRenderizada = "";
+
+    instanciasTablaturaCifra.forEach((instancia) => {
+      if (instancia instanceof Tablatura) {
+        tablatura.render(mode, tablaturaNum, cifraRenderizada);
+      } else if (instancia instanceof Cifra) {
+        cifra.render(mode, cifraChar, cifraRenderizada);
+      }
+    });
+
+    console.log(cifraRenderizada);
+    return cifraRenderizada;
+  };
+
   const w = document.documentElement.clientWidth;
   if (w < 340) {
     Tablatura.render("mobile");
@@ -120,11 +166,10 @@ acordes.forEach((acorde) => {
 });
 // Adicionando baixos
 acordes.forEach((acorde) => {
-  dicionarioNotas.forEach((baixo) => {
+  Object.keys(dicionarioNotas).forEach((baixo) => {
     acordes.push(`${acorde}/${baixo}`);
   });
 });
-console.log(arcordes);
 
 const tons = {
   C: 1,
