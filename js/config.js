@@ -92,11 +92,10 @@ const renderDependingOnWindowSize = () => {
       if (instancia instanceof Tablatura) {
         cifraRenderizada += instancia.render(modo, tablaturaNum);
       } else if (instancia instanceof Cifra) {
-        // instancia.render(modo, cifraChar, cifraRenderizada);
+        cifraRenderizada += instancia.render(modo, cifraChar);
       }
     });
 
-    console.log(cifraRenderizada);
     $("#cifra").html(cifraRenderizada);
     return cifraRenderizada;
   };

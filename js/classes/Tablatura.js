@@ -546,7 +546,6 @@ class Tablatura {
       indexedMatches.push(indexedMatchesTablatura);
     });
 
-    console.log(tablaturas)
     return tablaturas;
   }
 }

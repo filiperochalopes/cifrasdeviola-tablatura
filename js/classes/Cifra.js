@@ -16,7 +16,7 @@ class Cifra {
   }
 
   static extrairDaCifra(afinacao, cifra) {
-    let cifras;
+    let cifras = [];
     const cifraByLine = cifra.split("\n");
     // Regex para identificar padrão de tablatura
     const regexLinhaTablatura = new RegExp(/(.+)\|-(.+)/, "gi");
@@ -42,12 +42,13 @@ class Cifra {
       Boolean(linha.match(regexNota) && linha.match(regexWhiteSpaces));
 
     cifraByLine.forEach((linha, index) => {
+      let cifra = new Cifra({ afinacao });
       // Verifica se a linha não é uma tablatura
       if (!linha.match(regexLinhaTablatura)) {
         // Verifica se é uma linhaCifra
         if (isLinhaCifra(linha)) {
           // Se for uma cifra cria uma new cifra e verifica as duas próximas linhas para ver se tem letra ou parágrafo
-          console.log(linha);
+          cifra.linhaCifra = linha;
 
           if (
             cifraByLine[index + 1] &&
@@ -55,7 +56,7 @@ class Cifra {
             cifraByLine[index + 1].match(regexLinhaTexto)
           ) {
             // Adiciona linha de letra
-            console.log(cifraByLine[index + 1]);
+            cifra.linhaLetra = cifraByLine[index + 1];
           }
 
           if (
@@ -63,12 +64,38 @@ class Cifra {
             !isLinhaCifra(cifraByLine[index + 2])
           ) {
             // Adiciona linha de espaço entre parágrafo
-            console.log(cifraByLine[index + 2]);
+            cifra.fimParagrafo = true;
           }
+
+          cifra.linha = index;
+          cifras.push(cifra);
+        } else {
+          // Pode ser só um texto, incorporar depois. Mas aí as linhas seguintes não podem ser cifra.
         }
       }
     });
 
-    return [];
+    console.log(cifras);
+    return cifras;
+  }
+
+  render(modo = "desktop", caracteresPorLinha = 124) {
+    let html = "";
+    if (this.linhaCifra) {
+      let tmpCifraHtml = this.linhaCifra.replace(
+        new RegExp(/[ABCDEF]([\w#()]{1,7})?/, "g"),
+        "<span class='cifra'>$&</span>"
+      );
+      html += `${tmpCifraHtml}\n`;
+    }
+    if (this.linhaLetra) {
+      html += `${this.linhaLetra}\n`;
+    }
+    if (this.fimParagrafo) {
+      html += `\n\n`;
+    }
+
+    console.log(html);
+    return html;
   }
 }
