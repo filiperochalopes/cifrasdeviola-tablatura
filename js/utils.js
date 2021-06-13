@@ -32,3 +32,10 @@ function combine(a, q) {
 const escapeRegExp = (string) => {
   return string.replace(/[.*+?^${}()\/\|\[\]\\]/g, "\\$&");
 };
+
+const getLinhaByCharIndex = (charIndex) => {
+  const linha = appState.linhas.filter(
+    (linha) => charIndex <= linha.end && charIndex >= linha.start
+  );
+  return linha[0].order;
+};

@@ -12,7 +12,7 @@ class Cifra {
     this.linhaCifra = linhaCifra || "";
     this.linhaLetra = linhaLetra || "";
     this.fimParagrafo = fimParagrafo || false;
-    this.notacoes = []
+    this.notacoes = [];
   }
 
   static extrairDaCifra(afinacao, cifra) {
@@ -38,17 +38,37 @@ class Cifra {
     );
     */
 
+    const isLinhaCifra = (linha) =>
+      Boolean(linha.match(regexNota) && linha.match(regexWhiteSpaces));
+
     cifraByLine.forEach((linha, index) => {
       // Verifica se a linha não é uma tablatura
       if (!linha.match(regexLinhaTablatura)) {
         // Verifica se é uma linhaCifra
-        if (linha.match(regexNota) && linha.match(regexWhiteSpaces)) {
+        if (isLinhaCifra(linha)) {
           // Se for uma cifra cria uma new cifra e verifica as duas próximas linhas para ver se tem letra ou parágrafo
           console.log(linha);
+
+          if (
+            cifraByLine[index + 1] &&
+            !isLinhaCifra(cifraByLine[index + 1]) &&
+            cifraByLine[index + 1].match(regexLinhaTexto)
+          ) {
+            // Adiciona linha de letra
+            console.log(cifraByLine[index + 1]);
+          }
+
+          if (
+            typeof cifraByLine[index + 2] !== "undefined" &&
+            !isLinhaCifra(cifraByLine[index + 2])
+          ) {
+            // Adiciona linha de espaço entre parágrafo
+            console.log(cifraByLine[index + 2]);
+          }
         }
       }
     });
 
-    return null;
+    return [];
   }
 }

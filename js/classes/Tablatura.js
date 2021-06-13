@@ -203,7 +203,7 @@ class Tablatura {
    * Para utilizar a quebra de tablatura, utilizar o
    * modo='mobile'
    */
-  static render(modo = "desktop", colunasPorLinha = 12) {
+  render(modo = "desktop", colunasPorLinha = 12) {
     /**
      * Foi solicitado que, se tivessem duas notações numa mesma coluna
      * com slides, sendo que as notações possuissem quantidade de dígitos
@@ -244,16 +244,15 @@ class Tablatura {
     let cifraHtml = "",
       tmpCifraHtml = appState.cifraOriginal;
 
-    appState.tablaturas.forEach((tablatura, i) => {
-      if (!i) $("#tablaturas").text(""); // Primeira linha "0"
+      // if (!i) $("#tablaturas").text(""); // Primeira linha "0"
 
       let notacoesAtuaisEmColunas = {};
       // Verificando qual a ultima coluna
       let ultimaColuna =
-        tablatura.notacoes[tablatura.notacoes.length - 1].ordem;
+        this.notacoes[this.notacoes.length - 1].ordem;
       // Visualizando as notações por colunas
       for (let i = 0; i <= ultimaColuna; i++) {
-        let coluna = tablatura.notacoes.filter(
+        let coluna = this.notacoes.filter(
           (notacao) => notacao.ordem === i
         );
 
@@ -306,7 +305,7 @@ class Tablatura {
         tablaturaStringMobile = [];
 
       Object.values(notacoesAtuaisEmColunas).forEach((coluna, colunaIndex) => {
-        coluna = Afinacao.notasTocaveis(tablatura.afinacao, coluna);
+        coluna = Afinacao.notasTocaveis(this.afinacao, coluna);
         coluna = hammerOnPullOff(coluna);
         coluna = alinhamentoSlides(coluna);
         // Verifica qual a notacao de maior tamanho
@@ -321,7 +320,7 @@ class Tablatura {
         );
 
         // Criando strings de renderização inteiras
-        tablatura.cordas.forEach((corda, cordaIndex) => {
+        this.cordas.forEach((corda, cordaIndex) => {
           let string;
           if (tablaturaString[cordaIndex]) {
             string = tablaturaString[cordaIndex];
@@ -347,7 +346,7 @@ class Tablatura {
         });
 
         // Criando blocos de strings para quebra em renderização mobile
-        tablatura.cordas.forEach((corda, cordaIndex) => {
+        this.cordas.forEach((corda, cordaIndex) => {
           let string;
           const indexLinhaQuebrada =
             Math.ceil((colunaIndex + 1) / colunasPorLinha) - 1;
@@ -374,21 +373,21 @@ class Tablatura {
         });
       });
 
-      tablatura.tablaturaString = tablaturaString;
-      tablatura.tablaturaStringMobile = tablaturaStringMobile;
+      this.tablaturaString = tablaturaString;
+      this.tablaturaStringMobile = tablaturaStringMobile;
 
       let html = "";
       if (modo === "desktop") {
-        tablatura.tablaturaString.forEach((linha, linhaIndex) => {
-          if (!linhaIndex) html += `<span data-tablatura="${i}">`;
+        this.tablaturaString.forEach((linha, linhaIndex) => {
+          if (!linhaIndex) html += `<span data-tablatura="${this.index}">`;
           html += `${linha}\n`;
         });
         html += "</span>";
       } else if (modo === "mobile") {
-        tablatura.tablaturaStringMobile.forEach((bloco, blocoIndex) => {
+        this.tablaturaStringMobile.forEach((bloco, blocoIndex) => {
           bloco.forEach((linha, linhaIndex) => {
             if (!linhaIndex)
-              html += `<span data-tablatura="${i}" data-bloco="${blocoIndex}">`;
+              html += `<span data-tablatura="${this.index}" data-bloco="${blocoIndex}">`;
             html += `${linha}\n`;
           });
           html += "</span>\n";
@@ -399,60 +398,10 @@ class Tablatura {
         );
       }
       html += "\n\n";
-
+      
       $("#tablaturas").append(html);
 
-      tmpCifraHtml = tmpCifraHtml.replace(
-        new RegExp(escapeRegExp(tablatura.tablaturaStringOriginal[0])),
-        "<span>$&"
-      );
-
-      tmpCifraHtml = tmpCifraHtml.replace(
-        new RegExp(
-          `${escapeRegExp(
-            tablatura.tablaturaStringOriginal[
-              tablatura.tablaturaStringOriginal.length - 1
-            ]
-          )}\\s\\s`,
-          "s"
-        ),
-        "$&</span>"
-      );
-
-      // Recorta o texto entre os <span></span> e salva em cifraHtml
-      let startCut = tmpCifraHtml.indexOf("<span>"),
-        endCut = tmpCifraHtml.indexOf("</span>") + 7;
-
-      cifraHtml = cifraHtml + tmpCifraHtml.substring(startCut, endCut);
-      tmpCifraHtml = tmpCifraHtml.substring(endCut);
-    });
-
-    cifraHtml = cifraHtml + tmpCifraHtml;
-    tmpCifraHtml = "";
-
-    $("#cifra").html(cifraHtml);
-
-    if (modo === "desktop") {
-      $("#cifra span").each(function (index) {
-        $(this).html(
-          `${appState.tablaturas[index].tablaturaString
-            .map((linha) => `${linha}\n`)
-            .join("")}\n\n`
-        );
-      });
-    } else if (modo === "mobile") {
-      $("#cifra span").each(function (index) {
-        $(this).html(
-          `${appState.tablaturas[index].tablaturaStringMobile
-            .map((bloco) => `${bloco.map((linha) => `${linha}\n`).join("")}\n`)
-            .join("")}\n\n`
-        );
-      });
-    } else {
-      $("#cifra span").each(function (index) {
-        $(this).html(`Modo de renderização desconhecido\n\n`);
-      });
-    }
+    return html
   }
 
   /**
@@ -496,7 +445,7 @@ class Tablatura {
           linhasTablatura[linhasTablaturaIndex]
         );
         if (j === 0) {
-          tablaturaAtual.linha = indexesLinhasTablatura[linhasTablaturaIndex];
+          tablaturaAtual.linha = getLinhaByCharIndex(indexesLinhasTablatura[linhasTablaturaIndex]);
         }
         linhasTablaturaIndex++;
       }
@@ -506,6 +455,7 @@ class Tablatura {
     // lista com as notações encontradas com a ordem de quem veio primeiro
     let indexedMatches = [];
     tablaturas.forEach((tablatura, i) => {
+      tablatura.index = i
       let indexedMatchesTablatura = [];
       tablatura.tablaturaString.forEach((linha, j) => {
         // Encontrando notas numa tablatura e também textos de estrofe como "Riff 2" para que possa ser excluído
@@ -596,6 +546,7 @@ class Tablatura {
       indexedMatches.push(indexedMatchesTablatura);
     });
 
+    console.log(tablaturas)
     return tablaturas;
   }
 }

@@ -78,7 +78,9 @@ const renderDependingOnWindowSize = () => {
    * @param {int} tablaturaNum Número de notações por linha
    * @param {int} cifraChar Número de caracteres por linha na cifra
    */
-  const render = (mode, tablaturaNum, cifraChar) => {
+  const render = (modo, tablaturaNum, cifraChar) => {
+    $("#tablaturas").text("");
+
     // Verifica quem vem primeiro ordenando instancias de Cifra e Tablatura pela linha
     const instanciasTablaturaCifra = [
       ...appState.tablaturas,
@@ -88,23 +90,24 @@ const renderDependingOnWindowSize = () => {
 
     instanciasTablaturaCifra.forEach((instancia) => {
       if (instancia instanceof Tablatura) {
-        tablatura.render(mode, tablaturaNum, cifraRenderizada);
+        cifraRenderizada += instancia.render(modo, tablaturaNum);
       } else if (instancia instanceof Cifra) {
-        cifra.render(mode, cifraChar, cifraRenderizada);
+        // instancia.render(modo, cifraChar, cifraRenderizada);
       }
     });
 
     console.log(cifraRenderizada);
+    $("#cifra").html(cifraRenderizada);
     return cifraRenderizada;
   };
 
   const w = document.documentElement.clientWidth;
   if (w < 340) {
-    Tablatura.render("mobile");
+    render("mobile");
   } else if (w < 680) {
-    Tablatura.render("mobile", 16);
+    render("mobile", 16);
   } else {
-    Tablatura.render();
+    render();
   }
 };
 

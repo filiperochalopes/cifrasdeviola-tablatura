@@ -22,6 +22,7 @@ $(document).ready(function () {
       dataType: "text",
       success: function (data) {
         appState.cifraOriginal = data;
+        appState.linhas = checkCifraLines(data);
         $("#cifra_original").text(appState.cifraOriginal);
         $("#cifra").text(appState.cifraOriginal);
         appState.tablaturas = Tablatura.extrairDaCifra(
@@ -32,7 +33,6 @@ $(document).ready(function () {
           afinacoesPorApelido[appState.afinacaoOriginal],
           data
         );
-        appState.linhas = checkCifraLines(data);
         renderDependingOnWindowSize();
       },
     });
@@ -71,7 +71,7 @@ $(document).ready(function () {
     appState.tom = novoTom;
     $("input#tom").val(appState.tom);
     appState.tablaturas.forEach((tablatura) => tablatura.alterarTom(novoTom));
-    Tablatura.render();
+    renderDependingOnWindowSize();
   });
   // Alterando tom pelo botão de "Aumentar Meio Tom"
   $("button#aumentar_meio_tom").click(() => {
@@ -86,7 +86,7 @@ $(document).ready(function () {
     appState.tom = novoTom;
     $("input#tom").val(appState.tom);
     appState.tablaturas.forEach((tablatura) => tablatura.alterarTom(novoTom));
-    Tablatura.render();
+    renderDependingOnWindowSize();
   });
   // Alterando tom direto pela digitação
   $("input#tom").change((e) => {
@@ -100,7 +100,7 @@ $(document).ready(function () {
     }
     appState.tom = novoTom;
     appState.tablaturas.forEach((tablatura) => tablatura.alterarTom(novoTom));
-    Tablatura.render();
+    renderDependingOnWindowSize();
     $("input#tom").val(appState.tom);
   });
 
