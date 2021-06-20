@@ -11,7 +11,9 @@ class Cifra {
     this.afinacao = afinacao;
     this.linhaCifraOriginal = linhaCifra || "";
     this.linhaCifra = linhaCifra || "";
+    this.linhaCifraMobile = linhaCifra || "";
     this.linhaLetra = linhaLetra || "";
+    this.linhaLetraMobile = linhaLetra || "";
     this.fimParagrafo = fimParagrafo || false;
   }
 
@@ -29,14 +31,6 @@ class Cifra {
 
     let escapedAcordes = acordes.map((acorde) => escapeRegExp(acorde));
     let regexAcordes = escapedAcordes.join("|");
-    // console.log(regexAcordes)
-
-    /*
-    tmpCifraHtml.replace(
-      new RegExp(escapeRegExp(tablatura.tablaturaStringOriginal[0])),
-      "<span>$&"
-    );
-    */
 
     const isLinhaCifra = (linha) =>
       Boolean(linha.match(regexNota) && linha.match(regexWhiteSpaces));
@@ -79,21 +73,101 @@ class Cifra {
     return cifras;
   }
 
-  render(modo = "desktop", caracteresPorLinha = 124) {
+  render(modo = "desktop", caracteresPorLinha = 32) {
     let html = "";
-    if (this.linhaCifra) {
-      let tmpCifraHtml = this.linhaCifra.replace(
-        new RegExp(/[ABCDEFG]([\w#()]{1,7})?/, "g"),
-        "<span class='cifra'>$&</span>"
-      );
-      html += `${tmpCifraHtml}\n`;
+    if (modo === "desktop") {
+      if (this.linhaCifra) {
+        let tmpCifraHtml = this.linhaCifra.replace(
+          new RegExp(/[ABCDEFG]([\w#()]{1,7})?/, "g"),
+          "<span class='cifra'>$&</span>"
+        );
+        html += `${tmpCifraHtml}\n`;
+      }
+      if (this.linhaLetra) {
+        html += `${this.linhaLetra}\n`;
+      }
+      if (this.fimParagrafo) {
+        html += `\n\n`;
+      }
+    } else if (modo === "mobile") {
+      let numeroPartes = 1;
+      if (this.linhaCifra) {
+        numeroPartes = Math.ceil(this.linhaCifra.length / caracteresPorLinha);
+      }
+      if (this.linhaLetra) {
+        if (
+          Math.ceil(this.linhaLetra.length / caracteresPorLinha) > numeroPartes
+        ) {
+          numeroPartes = Math.ceil(this.linhaLetra.length / caracteresPorLinha);
+        }
+      }
+
+      const divisaoPartes = (string) => {
+        let startIndex = 0,
+          index = 0,
+          indexes = [];
+        index += caracteresPorLinha;
+        // Retorna o início e o fim de cada parte como um array de tuplas
+        // console.log(string.substring(startIndex, index));
+        // console.log(string.match())
+        let regex = /\S+/gi,
+          result,
+          results = [];
+        while ((result = regex.exec(string))) {
+          results.push({ string: result[0], index: result.index });
+        }
+        results.forEach((match) => {
+          if (
+            match.index < index &&
+            match.index + match.string.length > index
+          ) {
+            console.log(match);
+            indexes.push([startIndex, match.index + match.string.length]);
+            startIndex = match.index + match.string.length;
+            index = startIndex + caracteresPorLinha;
+            if (index > string.length && startIndex < string.length) {
+              indexes.push([startIndex, string.length]);
+            }
+          }
+        });
+        console.log(indexes);
+        // Captura a string e tenta cortar no ponto correto caracteresPorLinha
+
+        // Captura a string e tenta cortar no ponto correto caracteresPorLinha
+        startIndex = index;
+        return [];
+      };
+
+      divisaoPartes(this.linhaLetra);
+      this.linhaCifraMobile = [];
+      this.linhaLetraMobile = [];
+      for (let i = 0; i < numeroPartes; i++) {
+        this.linhaCifraMobile.push(
+          this.linhaCifra.substring(
+            i * caracteresPorLinha,
+            (i + 1) * caracteresPorLinha
+          )
+        );
+        this.linhaLetraMobile.push(
+          this.linhaLetra.substring(
+            i * caracteresPorLinha,
+            (i + 1) * caracteresPorLinha
+          )
+        );
+      }
+
+      // Renderizando
+      for (let i = 0; i < numeroPartes; i++) {
+        let tmpCifraHtml = this.linhaCifraMobile[i].replace(
+          new RegExp(/[ABCDEFG]([\w#()]{1,7})?/, "g"),
+          "<span class='cifra'>$&</span>"
+        );
+        html += `${tmpCifraHtml}\n`;
+        html += `${this.linhaLetraMobile[i]}\n`;
+      }
     }
-    if (this.linhaLetra) {
-      html += `${this.linhaLetra}\n`;
-    }
-    if (this.fimParagrafo) {
-      html += `\n\n`;
-    }
+
+    // console.log(this.linhaCifraMobile, this.linhaLetraMobile);
 
     return html;
   }
@@ -167,7 +241,7 @@ class Cifra {
         if (notaPreferencial.length > 0) {
           return notaPreferencial[0][0];
         } else {
-          console.log(nota, notaAtual, notaIndex+variacaoTom)
+          console.log(nota, notaAtual, notaIndex + variacaoTom);
           return notaAtual[0][0];
         }
       }

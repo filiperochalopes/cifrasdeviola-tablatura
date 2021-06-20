@@ -241,167 +241,159 @@ class Tablatura {
       return newColuna.length ? newColuna : coluna;
     };
 
-    let cifraHtml = "",
-      tmpCifraHtml = appState.cifraOriginal;
+    let notacoesAtuaisEmColunas = {};
+    // Verificando qual a ultima coluna
+    let ultimaColuna = this.notacoes[this.notacoes.length - 1].ordem;
+    // Visualizando as notações por colunas
+    for (let i = 0; i <= ultimaColuna; i++) {
+      let coluna = this.notacoes.filter((notacao) => notacao.ordem === i);
 
-      // if (!i) $("#tablaturas").text(""); // Primeira linha "0"
-
-      let notacoesAtuaisEmColunas = {};
-      // Verificando qual a ultima coluna
-      let ultimaColuna =
-        this.notacoes[this.notacoes.length - 1].ordem;
-      // Visualizando as notações por colunas
-      for (let i = 0; i <= ultimaColuna; i++) {
-        let coluna = this.notacoes.filter(
-          (notacao) => notacao.ordem === i
-        );
-
-        if (coluna.length) {
-          notacoesAtuaisEmColunas[i] = coluna;
-        }
+      if (coluna.length) {
+        notacoesAtuaisEmColunas[i] = coluna;
       }
+    }
 
-      /**
-       * Se tiver na coluna um hammer-on ou pull-off
-       * analisa se estão adequadamente posicionados, isto é,
-       * 5h2 está errado pois o hammer-on é sempre do menor
-       * para o maior e 2p5 está também errado pelo raciocínio
-       * inverso
-       */
-      const hammerOnPullOff = (coluna) => {
-        let newColuna = [];
-        coluna.forEach((notacao) => {
-          if (notacao.match.match(new RegExp(/(\d+p\d+)|(\d+h\d+)/, "g"))) {
-            // Analisa se a notação está correta
-            const numberArray = notacao.match.split(/\D/);
-            let print = notacao.print;
-            if (parseInt(numberArray[0]) > parseInt(numberArray[1])) {
-              print = print.replace(/\D/, "p");
-            } else {
-              print = print.replace(/\D/, "h");
-            }
-
-            newColuna.push(
-              new Notacao({
-                ...notacao,
-                print,
-                notacoes: [...notacao.notacoes],
-              })
-            );
+    /**
+     * Se tiver na coluna um hammer-on ou pull-off
+     * analisa se estão adequadamente posicionados, isto é,
+     * 5h2 está errado pois o hammer-on é sempre do menor
+     * para o maior e 2p5 está também errado pelo raciocínio
+     * inverso
+     */
+    const hammerOnPullOff = (coluna) => {
+      let newColuna = [];
+      coluna.forEach((notacao) => {
+        if (notacao.match.match(new RegExp(/(\d+p\d+)|(\d+h\d+)/, "g"))) {
+          // Analisa se a notação está correta
+          const numberArray = notacao.match.split(/\D/);
+          let print = notacao.print;
+          if (parseInt(numberArray[0]) > parseInt(numberArray[1])) {
+            print = print.replace(/\D/, "p");
           } else {
-            newColuna.push(
-              new Notacao({
-                ...notacao,
-                notacoes: [...notacao.notacoes],
-              })
-            );
-          }
-        });
-        return newColuna;
-      };
-
-      // Zerando a tablatura
-      let tablaturaString = [],
-        tablaturaStringMobile = [];
-
-      Object.values(notacoesAtuaisEmColunas).forEach((coluna, colunaIndex) => {
-        coluna = Afinacao.notasTocaveis(this.afinacao, coluna);
-        coluna = hammerOnPullOff(coluna);
-        coluna = alinhamentoSlides(coluna);
-        // Verifica qual a notacao de maior tamanho
-        let biggerLength = 0;
-        coluna.forEach((linha) => {
-          if (linha.length > biggerLength) biggerLength = linha.length;
-        });
-        // Organizando as colunas por linhas
-        let notacaoCordas = coluna.reduce(
-          (acc, cur) => ({ ...acc, [cur.cordaIndex]: cur }),
-          {}
-        );
-
-        // Criando strings de renderização inteiras
-        this.cordas.forEach((corda, cordaIndex) => {
-          let string;
-          if (tablaturaString[cordaIndex]) {
-            string = tablaturaString[cordaIndex];
-          } else {
-            string = `${corda.nota.notacao.padStart(2, " ")}|-`;
-          }
-          if (notacaoCordas[cordaIndex]) {
-            string = `${string}${notacaoCordas[cordaIndex].print.padEnd(
-              biggerLength,
-              notacaoCordas[cordaIndex].estatico ? " " : "-"
-            )}${notacaoCordas[cordaIndex].estatico ? " " : "-"}`;
-          } else {
-            // Não tem nenhuma notação no registro dessa corda, nessa coluna
-            const temEstaticoNaColuna = coluna.filter(
-              (notacao) => notacao.estatico === true
-            ).length;
-            string = `${string}${"".padEnd(
-              biggerLength,
-              temEstaticoNaColuna ? " " : "-"
-            )}${temEstaticoNaColuna ? " " : "-"}`;
-          }
-          tablaturaString[cordaIndex] = string;
-        });
-
-        // Criando blocos de strings para quebra em renderização mobile
-        this.cordas.forEach((corda, cordaIndex) => {
-          let string;
-          const indexLinhaQuebrada =
-            Math.ceil((colunaIndex + 1) / colunasPorLinha) - 1;
-
-          if (!tablaturaStringMobile[indexLinhaQuebrada])
-            tablaturaStringMobile[indexLinhaQuebrada] = [];
-
-          if (tablaturaStringMobile[indexLinhaQuebrada][cordaIndex]) {
-            string = tablaturaStringMobile[indexLinhaQuebrada][cordaIndex];
-          } else {
-            string = `${corda.nota.notacao.padStart(2, " ")}|-`;
+            print = print.replace(/\D/, "h");
           }
 
-          if (notacaoCordas[cordaIndex]) {
-            string = `${string}${notacaoCordas[cordaIndex].print.padEnd(
-              biggerLength,
-              "-"
-            )}-`;
-          } else {
-            string = `${string}${"".padEnd(biggerLength, "-")}-`;
-          }
+          newColuna.push(
+            new Notacao({
+              ...notacao,
+              print,
+              notacoes: [...notacao.notacoes],
+            })
+          );
+        } else {
+          newColuna.push(
+            new Notacao({
+              ...notacao,
+              notacoes: [...notacao.notacoes],
+            })
+          );
+        }
+      });
+      return newColuna;
+    };
 
-          tablaturaStringMobile[indexLinhaQuebrada][cordaIndex] = string;
-        });
+    // Zerando a tablatura
+    let tablaturaString = [],
+      tablaturaStringMobile = [];
+
+    Object.values(notacoesAtuaisEmColunas).forEach((coluna, colunaIndex) => {
+      coluna = Afinacao.notasTocaveis(this.afinacao, coluna);
+      coluna = hammerOnPullOff(coluna);
+      coluna = alinhamentoSlides(coluna);
+      // Verifica qual a notacao de maior tamanho
+      let biggerLength = 0;
+      coluna.forEach((linha) => {
+        if (linha.length > biggerLength) biggerLength = linha.length;
+      });
+      // Organizando as colunas por linhas
+      let notacaoCordas = coluna.reduce(
+        (acc, cur) => ({ ...acc, [cur.cordaIndex]: cur }),
+        {}
+      );
+
+      // Criando strings de renderização inteiras
+      this.cordas.forEach((corda, cordaIndex) => {
+        let string;
+        if (tablaturaString[cordaIndex]) {
+          string = tablaturaString[cordaIndex];
+        } else {
+          string = `${corda.nota.notacao.padStart(2, " ")}|-`;
+        }
+        if (notacaoCordas[cordaIndex]) {
+          string = `${string}${notacaoCordas[cordaIndex].print.padEnd(
+            biggerLength,
+            notacaoCordas[cordaIndex].estatico ? " " : "-"
+          )}${notacaoCordas[cordaIndex].estatico ? " " : "-"}`;
+        } else {
+          // Não tem nenhuma notação no registro dessa corda, nessa coluna
+          const temEstaticoNaColuna = coluna.filter(
+            (notacao) => notacao.estatico === true
+          ).length;
+          string = `${string}${"".padEnd(
+            biggerLength,
+            temEstaticoNaColuna ? " " : "-"
+          )}${temEstaticoNaColuna ? " " : "-"}`;
+        }
+        tablaturaString[cordaIndex] = string;
       });
 
-      this.tablaturaString = tablaturaString;
-      this.tablaturaStringMobile = tablaturaStringMobile;
+      // Criando blocos de strings para quebra em renderização mobile
+      this.cordas.forEach((corda, cordaIndex) => {
+        let string;
+        const indexLinhaQuebrada =
+          Math.ceil((colunaIndex + 1) / colunasPorLinha) - 1;
 
-      let html = "";
-      if (modo === "desktop") {
-        this.tablaturaString.forEach((linha, linhaIndex) => {
-          if (!linhaIndex) html += `<span data-tablatura="${this.index}">`;
+        if (!tablaturaStringMobile[indexLinhaQuebrada])
+          tablaturaStringMobile[indexLinhaQuebrada] = [];
+
+        if (tablaturaStringMobile[indexLinhaQuebrada][cordaIndex]) {
+          string = tablaturaStringMobile[indexLinhaQuebrada][cordaIndex];
+        } else {
+          string = `${corda.nota.notacao.padStart(2, " ")}|-`;
+        }
+
+        if (notacaoCordas[cordaIndex]) {
+          string = `${string}${notacaoCordas[cordaIndex].print.padEnd(
+            biggerLength,
+            "-"
+          )}-`;
+        } else {
+          string = `${string}${"".padEnd(biggerLength, "-")}-`;
+        }
+
+        tablaturaStringMobile[indexLinhaQuebrada][cordaIndex] = string;
+      });
+    });
+
+    this.tablaturaString = tablaturaString;
+    this.tablaturaStringMobile = tablaturaStringMobile;
+
+    let html = "";
+    if (modo === "desktop") {
+      this.tablaturaString.forEach((linha, linhaIndex) => {
+        if (!linhaIndex) html += `<span data-tablatura="${this.index}">`;
+        html += `${linha}\n`;
+      });
+      html += "</span>";
+    } else if (modo === "mobile") {
+      this.tablaturaStringMobile.forEach((bloco, blocoIndex) => {
+        bloco.forEach((linha, linhaIndex) => {
+          if (!linhaIndex)
+            html += `<span data-tablatura="${this.index}" data-bloco="${blocoIndex}">`;
           html += `${linha}\n`;
         });
-        html += "</span>";
-      } else if (modo === "mobile") {
-        this.tablaturaStringMobile.forEach((bloco, blocoIndex) => {
-          bloco.forEach((linha, linhaIndex) => {
-            if (!linhaIndex)
-              html += `<span data-tablatura="${this.index}" data-bloco="${blocoIndex}">`;
-            html += `${linha}\n`;
-          });
-          html += "</span>\n";
-        });
-      } else {
-        $("#tablaturas").append(
-          "Modo de renderização de tablaturas não reconhecido"
-        );
-      }
-      html += "\n\n";
-      
-      $("#tablaturas").append(html);
+        html += "</span>\n";
+      });
+    } else {
+      $("#tablaturas").append(
+        "Modo de renderização de tablaturas não reconhecido"
+      );
+    }
+    html += "\n\n";
 
-    return html
+    $("#tablaturas").append(html);
+
+    return html;
   }
 
   /**
@@ -445,7 +437,9 @@ class Tablatura {
           linhasTablatura[linhasTablaturaIndex]
         );
         if (j === 0) {
-          tablaturaAtual.linha = getLinhaByCharIndex(indexesLinhasTablatura[linhasTablaturaIndex]);
+          tablaturaAtual.linha = getLinhaByCharIndex(
+            indexesLinhasTablatura[linhasTablaturaIndex]
+          );
         }
         linhasTablaturaIndex++;
       }
@@ -455,7 +449,7 @@ class Tablatura {
     // lista com as notações encontradas com a ordem de quem veio primeiro
     let indexedMatches = [];
     tablaturas.forEach((tablatura, i) => {
-      tablatura.index = i
+      tablatura.index = i;
       let indexedMatchesTablatura = [];
       tablatura.tablaturaString.forEach((linha, j) => {
         // Encontrando notas numa tablatura e também textos de estrofe como "Riff 2" para que possa ser excluído
