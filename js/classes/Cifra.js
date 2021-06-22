@@ -30,7 +30,6 @@ class Cifra {
     );
 
     let escapedAcordes = acordes.map((acorde) => escapeRegExp(acorde));
-    let regexAcordes = escapedAcordes.join("|");
 
     const isLinhaCifra = (linha) =>
       Boolean(linha.match(regexNota) && linha.match(regexWhiteSpaces));
@@ -191,7 +190,7 @@ class Cifra {
           html += `${this.linhaLetraMobile[i]}\n`;
         }
       }
-      if(this.fimParagrafo){
+      if (this.fimParagrafo) {
         html += `\n\n`;
       }
     }
@@ -201,80 +200,75 @@ class Cifra {
     return html;
   }
 
+  static alteraNota = (nota, variacaoTom) => {
+    // Captura nota e vê o índice dela
+    const notaIndex = dicionarioNotas[nota],
+      // Verifica o tom que está para indicar as notas que pertencem a esse tom
+      tom = appState.tom,
+      padroesTom = {
+        maior: [0, 2, 4, 5, 7, 9, 11],
+        menor: [0, 2, 3, 5, 7, 8, 11],
+      },
+      padraoTom = tom.includes("m") ? padroesTom["menor"] : padroesTom["maior"];
+
+    let ordemNotas = ["C", "D", "E", "F", "G", "A", "B"];
+
+    // Reordenando `ordemNotas` com base no tom atual
+    let tmpOrdemNotas = [...ordemNotas];
+    // Verifica qual a primeira nota da ordem
+    tmpOrdemNotas[0] = tom.match(RegExp(/[ABCDEFG]/))[0];
+    // Verifica em que index da ordem está essa nota
+    let index0 = ordemNotas.findIndex((nota) => nota === tmpOrdemNotas[0]);
+    const getIndexNota = (index) => {
+      return index >= 7 ? index - 7 : index < 0 ? index + 7 : index;
+    };
+    // Adicionando demais notas na ordem
+    for (let i = 1; i < 7; i++) {
+      tmpOrdemNotas[i] = ordemNotas[getIndexNota(index0 + i)];
+    }
+
+    ordemNotas = [...tmpOrdemNotas];
+
+    /** Função que ajusta o index caso passe das 12 notas */
+    const getIndexSemitom = (index) => {
+      return index > 12 ? index - 12 : index <= 0 ? index + 12 : index;
+    };
+
+    let notasPreferenciais = [];
+    for (let i = 0; i < 7; i++) {
+      let notaAtual = Object.entries(dicionarioNotas).filter((notaBuscada) => {
+        return (
+          notaBuscada[0].includes(ordemNotas[i]) &&
+          notaBuscada[1] ===
+            getIndexSemitom(dicionarioNotas[tom] + padraoTom[i])
+        );
+      })[0];
+      notasPreferenciais[i] = notaAtual[0];
+    }
+
+    let notaAtual = Object.entries(dicionarioNotas).filter((notaBuscada) => {
+      return notaBuscada[1] === getIndexSemitom(notaIndex + variacaoTom);
+    });
+
+    if (notaAtual.length === 1) {
+      return notaAtual[0][0];
+    } else {
+      let notaPreferencial = notaAtual.filter((notaBuscada) =>
+        notasPreferenciais.includes(notaBuscada[0])
+      );
+      if (notaPreferencial.length > 0) {
+        return notaPreferencial[0][0];
+      } else {
+        console.log(nota, notaAtual, notaIndex + variacaoTom);
+        return notaAtual[0][0];
+      }
+    }
+  };
+
   alterarTom() {
     const numeroTomOriginal = dicionarioTons[appState.tomOriginal],
       numeroTomAtual = dicionarioTons[appState.tom],
       variacaoTom = numeroTomAtual - numeroTomOriginal;
-
-    const trocaNota = (nota, variacaoTom) => {
-      // Captura nota e vê o índice dela
-      const notaIndex = dicionarioNotas[nota],
-        // Verifica o tom que está para indicar as notas que pertencem a esse tom
-        tom = appState.tom,
-        padroesTom = {
-          maior: [0, 2, 4, 5, 7, 9, 11],
-          menor: [0, 2, 3, 5, 7, 8, 11],
-        },
-        padraoTom = tom.includes("m")
-          ? padroesTom["menor"]
-          : padroesTom["maior"];
-
-      let ordemNotas = ["C", "D", "E", "F", "G", "A", "B"];
-      let notas = {};
-
-      // Reordenando `ordemNotas` com base no tom atual
-      let tmpOrdemNotas = [...ordemNotas];
-      // Verifica qual a primeira nota da ordem
-      tmpOrdemNotas[0] = tom.match(RegExp(/[ABCDEFG]/))[0];
-      // Verifica em que index da ordem está essa nota
-      let index0 = ordemNotas.findIndex((nota) => nota === tmpOrdemNotas[0]);
-      const getIndexNota = (index) => {
-        return index >= 7 ? index - 7 : index < 0 ? index + 7 : index;
-      };
-      // Adicionando demais notas na ordem
-      for (let i = 1; i < 7; i++) {
-        tmpOrdemNotas[i] = ordemNotas[getIndexNota(index0 + i)];
-      }
-
-      ordemNotas = [...tmpOrdemNotas];
-
-      /** Função que ajusta o index caso passe das 12 notas */
-      const getIndexSemitom = (index) => {
-        return index > 12 ? index - 12 : index <= 0 ? index + 12 : index;
-      };
-
-      let notasPreferenciais = [];
-      for (let i = 0; i < 7; i++) {
-        let notaAtual = Object.entries(dicionarioNotas).filter(
-          (notaBuscada) => {
-            return (
-              notaBuscada[0].includes(ordemNotas[i]) &&
-              notaBuscada[1] ===
-                getIndexSemitom(dicionarioNotas[tom] + padraoTom[i])
-            );
-          }
-        )[0];
-        notasPreferenciais[i] = notaAtual[0];
-      }
-
-      let notaAtual = Object.entries(dicionarioNotas).filter((notaBuscada) => {
-        return notaBuscada[1] === getIndexSemitom(notaIndex + variacaoTom);
-      });
-
-      if (notaAtual.length === 1) {
-        return notaAtual[0][0];
-      } else {
-        let notaPreferencial = notaAtual.filter((notaBuscada) =>
-          notasPreferenciais.includes(notaBuscada[0])
-        );
-        if (notaPreferencial.length > 0) {
-          return notaPreferencial[0][0];
-        } else {
-          console.log(nota, notaAtual, notaIndex + variacaoTom);
-          return notaAtual[0][0];
-        }
-      }
-    };
 
     const regexNotaIndividual = new RegExp(
       /(Ab|A#|A|Bb|B#|B|Cb|C#|C|Db|D#|D|Eb|E#|E|Fb|F#|F|Gb|G#|G|A)/,
@@ -283,7 +277,7 @@ class Cifra {
 
     this.linhaCifra = this.linhaCifraOriginal;
     this.linhaCifra = this.linhaCifra.replace(regexNotaIndividual, (m) =>
-      trocaNota(m, variacaoTom)
+      Cifra.alteraNota(m, variacaoTom)
     );
   }
 }
