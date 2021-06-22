@@ -185,13 +185,24 @@ class Tablatura {
           length: match.length,
         });
       } else {
+        let printString;
+        if (notacao.match.match(new RegExp(/\(\D+\)/))) {
+          // Convertendo notas dentro da tablatura
+          let nota = notacao.match.match(new RegExp(/\(\D+\)/))[0];
+          nota = nota.replace(/\(|\)/g, "");
+          console.log(nota);
+          printString = Cifra.alteraNota(nota, variacaoTom);
+        }
+        console.log(printString);
         a[i] = new Notacao({
           ...notacao,
+          print: `(${printString})` || notacao.print,
         });
       }
     });
 
     this.notacoes = notacoesAtuais;
+    console.log(notacoesAtuais)
 
     console.log(
       `Tom trocado. Tom original: ${appState.tomOriginal}, Tom novo: ${appState.tom}, variação de notas: ${variacaoTom}`
@@ -295,11 +306,11 @@ class Tablatura {
     // Zerando a tablatura
     let tablaturaString = [],
       tablaturaStringMobile = [];
-
-    Object.values(notacoesAtuaisEmColunas).forEach((coluna, colunaIndex) => {
-      coluna = Afinacao.notasTocaveis(this.afinacao, coluna);
-      coluna = hammerOnPullOff(coluna);
-      coluna = alinhamentoSlides(coluna);
+      Object.values(notacoesAtuaisEmColunas).forEach((coluna, colunaIndex) => {
+        coluna = Afinacao.notasTocaveis(this.afinacao, coluna);
+        console.log(coluna)
+        coluna = hammerOnPullOff(coluna);
+        coluna = alinhamentoSlides(coluna);
       // Verifica qual a notacao de maior tamanho
       let biggerLength = 0;
       coluna.forEach((linha) => {
@@ -320,6 +331,7 @@ class Tablatura {
           string = `${corda.nota.notacao.padStart(2, " ")}|-`;
         }
         if (notacaoCordas[cordaIndex]) {
+          // console.log(notacaoCordas[cordaIndex])
           string = `${string}${notacaoCordas[cordaIndex].print.padEnd(
             biggerLength,
             notacaoCordas[cordaIndex].estatico ? " " : "-"
@@ -405,7 +417,7 @@ class Tablatura {
    * @param {string} cifra String da cifra
    */
   static extrairDaCifra(afinacao, cifra) {
-    let tablatura, linhasTablatura;
+    let linhasTablatura;
     const tablaturas = [];
     const numeroCordas = afinacao.cordas.length;
 
@@ -518,6 +530,7 @@ class Tablatura {
       indexedMatchesTablatura.forEach((notacao, i, a) => {
         const estatico =
           notacao.match.match(new RegExp(/\(\D+\)|\[.+\]/)) !== null;
+
         a[i] = new Notacao({
           ...notacao,
           estatico,

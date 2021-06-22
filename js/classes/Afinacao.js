@@ -155,7 +155,6 @@ class Afinacao {
         ...linha,
         match,
         length: match.length,
-        print: match,
       })
     });
     if (newColuna.length <= 0) newColuna = coluna;
