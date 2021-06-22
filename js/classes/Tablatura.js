@@ -118,7 +118,7 @@ class Tablatura {
     console.log("Afinação trocada", this);
   }
 
-  alterarTom(PREMIUM = false) {
+  alterarTom(PREMIUM = appState.premium) {
     const numeroTomOriginal = dicionarioTons[appState.tomOriginal],
       numeroTomAtual = dicionarioTons[appState.tom],
       variacaoTom = numeroTomAtual - numeroTomOriginal;
@@ -131,7 +131,7 @@ class Tablatura {
     notacoesAtuais.forEach((notacao, i, a) => {
       if (!notacao.estatico) {
         if (PREMIUM) {
-          console.log(PREMIUM)
+          console.log(PREMIUM);
           const notacoes = notacao.notacoes.map((n) => {
             let valor = n.valor;
             if (n.tipo === "nota") {

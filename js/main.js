@@ -118,4 +118,8 @@ $(document).ready(function () {
     );
     renderDependingOnWindowSize();
   });
+
+  $("#assinatura").change(function () {
+    appState.premium = $(this).prop("checked")
+  });
 });

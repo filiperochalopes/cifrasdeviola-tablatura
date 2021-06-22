@@ -50,6 +50,7 @@ let appState = {
   cifras: [],
   cifraOriginal: "", // Útil para reconhecimento de padrões na hora de fazer a substituição
   linhas: [],
+  premium: false
 };
 
 const checkCifraLines = (cifra) => {
