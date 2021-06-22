@@ -90,80 +90,109 @@ class Cifra {
         html += `\n\n`;
       }
     } else if (modo === "mobile") {
-      let numeroPartes = 1;
-      if (this.linhaCifra) {
-        numeroPartes = Math.ceil(this.linhaCifra.length / caracteresPorLinha);
-      }
-      if (this.linhaLetra) {
-        if (
-          Math.ceil(this.linhaLetra.length / caracteresPorLinha) > numeroPartes
-        ) {
-          numeroPartes = Math.ceil(this.linhaLetra.length / caracteresPorLinha);
-        }
-      }
-
       const divisaoPartes = (string) => {
         let startIndex = 0,
           index = 0,
           indexes = [];
         index += caracteresPorLinha;
-        // Retorna o início e o fim de cada parte como um array de tuplas
-        // console.log(string.substring(startIndex, index));
-        // console.log(string.match())
         let regex = /\S+/gi,
           result,
           results = [];
         while ((result = regex.exec(string))) {
           results.push({ string: result[0], index: result.index });
         }
-        results.forEach((match) => {
+        results.forEach((match, i) => {
           if (
             match.index < index &&
             match.index + match.string.length > index
           ) {
-            console.log(match);
+            // Se a palavra quebra no meio do ponto de corte
             indexes.push([startIndex, match.index + match.string.length]);
             startIndex = match.index + match.string.length;
             index = startIndex + caracteresPorLinha;
             if (index > string.length && startIndex < string.length) {
               indexes.push([startIndex, string.length]);
             }
+          } else if (
+            match.index + match.string.length > index &&
+            match.index >= index
+          ) {
+            // Se já tiver passado para a outra quebra de linha
+            indexes.push([startIndex, match.index + match.string.length]);
+            startIndex = match.index + match.string.length;
+            index = startIndex + caracteresPorLinha;
+            if (index > string.length && startIndex < string.length) {
+              indexes.push([startIndex, string.length]);
+            }
+          } else if (i + 1 == results.length) {
+            // Se é o último caractere
+
+            startIndex = match.index + match.string.length;
+            index = startIndex + caracteresPorLinha;
+            indexes.push([startIndex, string.length]);
           }
         });
-        console.log(indexes);
-        // Captura a string e tenta cortar no ponto correto caracteresPorLinha
-
-        // Captura a string e tenta cortar no ponto correto caracteresPorLinha
-        startIndex = index;
-        return [];
+        return indexes;
       };
 
-      divisaoPartes(this.linhaLetra);
+      const divisaoPartesLetra = divisaoPartes(this.linhaLetra),
+        divisaoPartesCifra = divisaoPartes(this.linhaCifra),
+        divisaoPartesLetraCifra = [divisaoPartesLetra, divisaoPartesCifra];
+
+      let partesMaiores = divisaoPartesLetra;
+      if (divisaoPartesLetra.length < divisaoPartesCifra)
+        partesMaiores = divisaoPartesCifra;
+
       this.linhaCifraMobile = [];
       this.linhaLetraMobile = [];
-      for (let i = 0; i < numeroPartes; i++) {
-        this.linhaCifraMobile.push(
-          this.linhaCifra.substring(
-            i * caracteresPorLinha,
-            (i + 1) * caracteresPorLinha
-          )
-        );
-        this.linhaLetraMobile.push(
-          this.linhaLetra.substring(
-            i * caracteresPorLinha,
-            (i + 1) * caracteresPorLinha
-          )
-        );
-      }
+      console.log(divisaoPartesLetraCifra);
+      partesMaiores.forEach((_, index) => {
+        if (divisaoPartesLetraCifra[1][index]) {
+          this.linhaCifraMobile.push(
+            this.linhaCifra.substring(
+              divisaoPartesLetraCifra[0][index]
+                ? divisaoPartesLetraCifra[0][index][0]
+                : divisaoPartesLetraCifra[1][index][0],
+              divisaoPartesLetraCifra[0][index]
+                ? divisaoPartesLetraCifra[0][index][1]
+                : divisaoPartesLetraCifra[1][index][1]
+            )
+          );
+        }
+
+        if (divisaoPartesLetraCifra[0][index]) {
+          console.log(
+            this.linhaLetra.substring(
+              divisaoPartesLetraCifra[0][index][0],
+              divisaoPartesLetraCifra[0][index][1]
+            )
+          );
+          this.linhaLetraMobile.push(
+            this.linhaLetra.substring(
+              divisaoPartesLetraCifra[0][index][0],
+              divisaoPartesLetraCifra[0][index][1]
+            )
+          );
+        }
+      });
 
       // Renderizando
-      for (let i = 0; i < numeroPartes; i++) {
-        let tmpCifraHtml = this.linhaCifraMobile[i].replace(
-          new RegExp(/[ABCDEFG]([\w#()]{1,7})?/, "g"),
-          "<span class='cifra'>$&</span>"
-        );
-        html += `${tmpCifraHtml}\n`;
-        html += `${this.linhaLetraMobile[i]}\n`;
+      for (let i = 0; i < partesMaiores.length; i++) {
+        if (this.linhaCifraMobile[i]) {
+          let tmpCifraHtml = this.linhaCifraMobile[i].replace(
+            new RegExp(/[ABCDEFG]([\w#()]{1,7})?/, "g"),
+            "<span class='cifra'>$&</span>"
+          );
+          html += `${tmpCifraHtml}\n`;
+          // console.log(this.linhaCifraMobile[i]);
+        }
+        // console.log(this.linhaLetraMobile[i]);
+        if (this.linhaLetraMobile[i]) {
+          html += `${this.linhaLetraMobile[i]}\n`;
+        }
+      }
+      if(this.fimParagrafo){
+        html += `\n\n`;
       }
     }
 
