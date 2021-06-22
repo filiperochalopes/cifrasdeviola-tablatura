@@ -71,8 +71,8 @@ $(document).ready(function () {
     appState.tom = novoTom;
     $("input#tom").val(appState.tom);
     // Alterando tom e renderizando no corpo do elemento #cifra
-    appState.tablaturas.forEach((tablatura) => tablatura.alterarTom(novoTom));
-    appState.cifras.forEach((cifra) => cifra.alterarTom(novoTom));
+    appState.tablaturas.forEach((tablatura) => tablatura.alterarTom());
+    appState.cifras.forEach((cifra) => cifra.alterarTom());
     renderDependingOnWindowSize();
   });
   // Alterando tom pelo botão de "Aumentar Meio Tom"
@@ -88,8 +88,8 @@ $(document).ready(function () {
     appState.tom = novoTom;
     $("input#tom").val(appState.tom);
     // Alterando tom e renderizando no corpo do elemento #cifra
-    appState.tablaturas.forEach((tablatura) => tablatura.alterarTom(novoTom));
-    appState.cifras.forEach((cifra) => cifra.alterarTom(novoTom));
+    appState.tablaturas.forEach((tablatura) => tablatura.alterarTom());
+    appState.cifras.forEach((cifra) => cifra.alterarTom());
     renderDependingOnWindowSize();
   });
   // Alterando tom direto pela digitação
@@ -105,8 +105,8 @@ $(document).ready(function () {
     appState.tom = novoTom;
     $("input#tom").val(appState.tom);
     // Alterando tom e renderizando no corpo do elemento #cifra
-    appState.tablaturas.forEach((tablatura) => tablatura.alterarTom(novoTom));
-    appState.cifras.forEach((cifra) => cifra.alterarTom(novoTom));
+    appState.tablaturas.forEach((tablatura) => tablatura.alterarTom());
+    appState.cifras.forEach((cifra) => cifra.alterarTom());
     renderDependingOnWindowSize();
   });
 
