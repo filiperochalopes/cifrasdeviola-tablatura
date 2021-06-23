@@ -131,7 +131,6 @@ class Tablatura {
     notacoesAtuais.forEach((notacao, i, a) => {
       if (!notacao.estatico) {
         if (PREMIUM) {
-          console.log(PREMIUM);
           const notacoes = notacao.notacoes.map((n) => {
             let valor = n.valor;
             if (n.tipo === "nota") {
@@ -205,7 +204,6 @@ class Tablatura {
     });
 
     this.notacoes = notacoesAtuais;
-    console.log(notacoesAtuais);
 
     console.log(
       `Tom trocado. Tom original: ${appState.tomOriginal}, Tom novo: ${appState.tom}, variação de notas: ${variacaoTom}`

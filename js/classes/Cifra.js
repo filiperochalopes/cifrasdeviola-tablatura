@@ -5,66 +5,110 @@
  * estáticas
  */
 class Cifra {
-  constructor({ afinacao, linha, linhaCifra, linhaLetra, fimParagrafo }) {
+  constructor({
+    afinacao,
+    linha,
+    linhaCifra,
+    linhaUmLetra,
+    linhaDoisLetra,
+    fimParagrafo,
+  }) {
     // Linha onde fica a tablatura, permite que seja ordenada juntamento com as cifras
     this.linha = linha || 0;
     this.afinacao = afinacao;
     this.linhaCifraOriginal = linhaCifra || "";
     this.linhaCifra = linhaCifra || "";
     this.linhaCifraMobile = linhaCifra || "";
-    this.linhaLetra = linhaLetra || "";
-    this.linhaLetraMobile = linhaLetra || "";
+    this.linhaUmLetra = linhaUmLetra || "";
+    this.linhaDoisLetra = linhaDoisLetra || "";
+    this.linhaUmLetraMobile = linhaUmLetra || "";
+    this.linhaDoisLetraMobile = linhaDoisLetra || "";
     this.fimParagrafo = fimParagrafo || false;
   }
 
   static extrairDaCifra(afinacao, cifra) {
     let cifras = [];
-    const cifraByLine = cifra.split("\n");
-    // Regex para identificar padrão de tablatura
-    const regexLinhaTablatura = new RegExp(/(.+)\|-(.+)/, "gi");
-    const regexNota = new RegExp(/[ABCDEFG]([\w#()]{1,7})?/, "g"),
-      regexWhiteSpaces = new RegExp(/[ ]{2}/, "g");
-    const regexLinhaTexto = new RegExp(
-      /[1-9A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ:" ]+/,
-      "gi"
-    );
-
-    let escapedAcordes = acordes.map((acorde) => escapeRegExp(acorde));
+    const cifraByLine = cifra.split("\n"),
+      // Regex para identificar padrão de tablatura
+      regexLinhaTablatura = new RegExp(/(.+)\|-(.+)/, "gi"),
+      regexNota = new RegExp(/[ABCDEFG]([\w#()]{1,7})?/, "g"),
+      regexWhiteSpaces = new RegExp(/[ ]{2}/, "g"),
+      regexLinhaTexto = new RegExp(
+        /[1-9A-Za-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ:" ]+/,
+        "gi"
+      ),
+      regexLinhaEmBranco = new RegExp(/^\s*$/, "gm");
 
     const isLinhaCifra = (linha) =>
       Boolean(linha.match(regexNota) && linha.match(regexWhiteSpaces));
 
+    const isLinhaBranco = (linha) => Boolean(linha.match(regexLinhaEmBranco));
+
+    const isLinhaTexto = (linha) => Boolean(linha.match(regexLinhaTexto));
+
+    const isTablatura = (linha) => Boolean(linha.match(regexLinhaTablatura));
+
+    let linhaLida = 0;
     cifraByLine.forEach((linha, index) => {
-      let cifra = new Cifra({ afinacao });
-      // Verifica se a linha não é uma tablatura
-      if (!linha.match(regexLinhaTablatura)) {
-        // Verifica se é uma linhaCifra
-        if (isLinhaCifra(linha)) {
-          // Se for uma cifra cria uma new cifra e verifica as duas próximas linhas para ver se tem letra ou parágrafo
-          cifra.linhaCifra = linha;
-          cifra.linhaCifraOriginal = linha;
+      // Cada cifra pode começar com texto ou cifra, mas sempre termina em uma cifra ou espaço em branco
 
-          if (
-            cifraByLine[index + 1] &&
-            !isLinhaCifra(cifraByLine[index + 1]) &&
-            cifraByLine[index + 1].match(regexLinhaTexto)
-          ) {
-            // Adiciona linha de letra
-            cifra.linhaLetra = cifraByLine[index + 1];
+      if (index > linhaLida) {
+        if (!isTablatura(linha)) {
+          let cifra = new Cifra({ afinacao });
+          // Verifica se a linha não é uma tablatura
+          let i = 0,
+            encontrouFim = false;
+
+          if (isLinhaCifra(linha)) {
+            // Verifica se é uma linhaCifra, a cifra só pode estar na primeira linha de um objeto Cifra
+            cifra.linhaCifra = linha;
+            cifra.linhaCifraOriginal = linha;
           }
 
-          if (
-            typeof cifraByLine[index + 2] !== "undefined" &&
-            !isLinhaCifra(cifraByLine[index + 2])
-          ) {
-            // Adiciona linha de espaço entre parágrafo
-            cifra.fimParagrafo = true;
+          while (encontrouFim === false) {
+            if (
+              cifraByLine[index + i] &&
+              typeof cifraByLine[index + i] !== "undefined" &&
+              !isLinhaCifra(cifraByLine[index + i]) &&
+              isLinhaTexto(cifraByLine[index + i])
+            ) {
+              if (!this.linhaUmLetra) {
+                cifra.linhaUmLetra = cifraByLine[index + i];
+              } else {
+                cifra.linhaDoisLetra = cifraByLine[index + i];
+              }
+            }
+
+            if (
+              typeof cifraByLine[index + i] !== "undefined" &&
+              !isLinhaCifra(cifraByLine[index + i]) &&
+              isLinhaBranco(cifraByLine[index + i])
+            ) {
+              cifra.fimParagrafo = true;
+              encontrouFim = true;
+              break;
+            }
+
+            if (
+              i !== 0 &&
+              cifraByLine[index + i] &&
+              typeof cifraByLine[index + i] !== "undefined" &&
+              isLinhaCifra(cifraByLine[index + i])
+            ) {
+              encontrouFim = true;
+              break;
+            }
+
+            if (index + i >= cifraByLine.length) {
+              encontrouFim = true;
+              break;
+            }
+
+            i++;
           }
 
-          cifra.linha = index;
-          cifras.push(cifra);
-        } else {
-          // Pode ser só um texto, incorporar depois. Mas aí as linhas seguintes não podem ser cifra.
+          linhaLida = index + (i - 1);
+          if (cifra.linhaCifra || cifra.linhaUmLetra) cifras.push(cifra);
         }
       }
     });
@@ -82,8 +126,11 @@ class Cifra {
         );
         html += `${tmpCifraHtml}\n`;
       }
-      if (this.linhaLetra) {
-        html += `${this.linhaLetra}\n`;
+      if (this.linhaUmLetra.length) {
+        html += `${this.linhaUmLetra}\n`;
+      }
+      if (this.linhaDoisLetra.length) {
+        html += `${this.linhaDoisLetra}\n`;
       }
       if (this.fimParagrafo) {
         html += `\n\n`;
@@ -124,52 +171,69 @@ class Cifra {
               indexes.push([startIndex, string.length]);
             }
           } else if (i + 1 == results.length) {
-            // Se é o último caractere
-
-            startIndex = match.index + match.string.length;
-            index = startIndex + caracteresPorLinha;
-            indexes.push([startIndex, string.length]);
+            // Última palavra
+            if (
+              indexes[0] &&
+              indexes[indexes.length - 1][1] !== string.length
+            ) {
+              indexes.push([startIndex, string.length]);
+            } else if (!indexes[0]) {
+              indexes.push([startIndex, string.length]);
+            }
           }
         });
         return indexes;
       };
 
-      const divisaoPartesLetra = divisaoPartes(this.linhaLetra),
+      const divisaoPartesLetraUm = divisaoPartes(this.linhaUmLetra),
+        divisaoPartesLetraDois = divisaoPartes(this.linhaDoisLetra),
         divisaoPartesCifra = divisaoPartes(this.linhaCifra),
-        divisaoPartesLetraCifra = [divisaoPartesLetra, divisaoPartesCifra];
+        divisaoPartesLetraCifra = [
+          divisaoPartesLetraUm,
+          divisaoPartesLetraDois,
+          divisaoPartesCifra,
+        ];
 
-      let partesMaiores = divisaoPartesLetra;
-      if (divisaoPartesLetra.length < divisaoPartesCifra)
+      let partesMaiores = divisaoPartesLetraUm;
+      if (divisaoPartesLetraDois.length > partesMaiores.length) {
+        partesMaiores = divisaoPartesLetraDois;
+      }
+      if (divisaoPartesCifra.length > partesMaiores.length) {
         partesMaiores = divisaoPartesCifra;
+      }
 
       this.linhaCifraMobile = [];
-      this.linhaLetraMobile = [];
-      console.log(divisaoPartesLetraCifra);
+      this.linhaUmLetraMobile = [];
+      this.linhaDoisLetraMobile = [];
+
       partesMaiores.forEach((_, index) => {
-        if (divisaoPartesLetraCifra[1][index]) {
+        if (divisaoPartesLetraCifra[2][index]) {
           this.linhaCifraMobile.push(
             this.linhaCifra.substring(
               divisaoPartesLetraCifra[0][index]
-                ? divisaoPartesLetraCifra[0][index][0]
-                : divisaoPartesLetraCifra[1][index][0],
+              ? divisaoPartesLetraCifra[0][index][0]
+              : divisaoPartesLetraCifra[2][index][0],
               divisaoPartesLetraCifra[0][index]
                 ? divisaoPartesLetraCifra[0][index][1]
-                : divisaoPartesLetraCifra[1][index][1]
+                : divisaoPartesLetraCifra[2][index][1]
             )
           );
         }
 
         if (divisaoPartesLetraCifra[0][index]) {
-          console.log(
-            this.linhaLetra.substring(
+          this.linhaUmLetraMobile.push(
+            this.linhaUmLetra.substring(
               divisaoPartesLetraCifra[0][index][0],
               divisaoPartesLetraCifra[0][index][1]
             )
           );
-          this.linhaLetraMobile.push(
-            this.linhaLetra.substring(
-              divisaoPartesLetraCifra[0][index][0],
-              divisaoPartesLetraCifra[0][index][1]
+        }
+
+        if (divisaoPartesLetraCifra[1][index]) {
+          this.linhaDoisLetraMobile.push(
+            this.linhaDoisLetra.substring(
+              divisaoPartesLetraCifra[1][index][0],
+              divisaoPartesLetraCifra[1][index][1]
             )
           );
         }
@@ -186,8 +250,11 @@ class Cifra {
           // console.log(this.linhaCifraMobile[i]);
         }
         // console.log(this.linhaLetraMobile[i]);
-        if (this.linhaLetraMobile[i]) {
-          html += `${this.linhaLetraMobile[i]}\n`;
+        if (this.linhaUmLetraMobile[i]) {
+          html += `${this.linhaUmLetraMobile[i]}\n`;
+        }
+        if (this.linhaDoisLetraMobile[i]) {
+          html += `${this.linhaDoisLetraMobile[i]}\n`;
         }
       }
       if (this.fimParagrafo) {
