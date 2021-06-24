@@ -54,7 +54,7 @@ class Cifra {
 
       if (index > linhaLida) {
         if (!isTablatura(linha)) {
-          let cifra = new Cifra({ afinacao });
+          let cifra = new Cifra({ afinacao, linha: index });
           // Verifica se a linha não é uma tablatura
           let i = 0,
             encontrouFim = false;
@@ -113,6 +113,7 @@ class Cifra {
       }
     });
 
+    console.log(cifras)
     return cifras;
   }
 
