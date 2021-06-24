@@ -21,13 +21,12 @@ class Tablatura {
     this.notacoesOriginais = this.notacoes;
   }
 
-  alterarAfinacao(apelidoAfinacao) {
+  alterarAfinacao(apelidoAfinacao, PREMIUM=appState.premium) {
     const afinacao = afinacoesPorApelido[apelidoAfinacao];
 
     // restaura tom original
     appState.tom = appState.tomOriginal;
     $("#tom").val(appState.tom);
-
     if (apelidoAfinacao !== appState.afinacaoOriginal) {
       afinacao.cordas.forEach((corda, cordaIndex) => {
         const numeroNotaAnterior =
@@ -38,7 +37,7 @@ class Tablatura {
         this.notacoesOriginaisAfinacao.forEach((notacao, i, a) => {
           if (notacao.cordaIndex === cordaIndex) {
             // Caso coincida a corda, troca a nota
-            if (!notacao.estatico) {
+            if (!notacao.estatico && PREMIUM) {
               const notacoes = notacao.notacoes.map((n) => {
                 let valor = n.valor;
                 if (n.tipo === "nota") {
@@ -99,6 +98,7 @@ class Tablatura {
 
     this.afinacao = afinacao;
     this.cordas = this.afinacao.cordas;
+    // Caso a afinação selecionada seja a mesma da original, apenas restirui os parâmetros iniciais em vez de modular
     if (apelidoAfinacao === appState.afinacaoOriginal) {
       let notacoesOriginaisCopy = [];
       this.notacoesOriginais.forEach((notacao) => {
