@@ -187,18 +187,19 @@ class Tablatura {
           });
         }
       } else {
-        let printString;
         if (notacao.match.match(new RegExp(/\(\D+\)/))) {
           // Convertendo notas dentro da tablatura
           let nota = notacao.match.match(new RegExp(/\(\D+\)/))[0];
           nota = nota.replace(/\(|\)/g, "");
           console.log(nota);
-          printString = Cifra.alteraNota(nota, variacaoTom);
+          let printString = Cifra.alteraNota(nota, variacaoTom);
+          a[i] = new Notacao({
+            ...notacao,
+            print: `(${printString})` || notacao.print,
+          });
         }
-        console.log(printString);
         a[i] = new Notacao({
           ...notacao,
-          print: `(${printString})` || notacao.print,
         });
       }
     });
