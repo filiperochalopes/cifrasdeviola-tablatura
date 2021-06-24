@@ -53,6 +53,7 @@ class Cifra {
       // Cada cifra pode começar com texto ou cifra, mas sempre termina em uma cifra ou espaço em branco
 
       if (index > linhaLida) {
+        // console.log(linha, linhaLida)
         if (!isTablatura(linha)) {
           let cifra = new Cifra({ afinacao, linha: index });
           // Verifica se a linha não é uma tablatura
@@ -72,10 +73,14 @@ class Cifra {
               !isLinhaCifra(cifraByLine[index + i]) &&
               isLinhaTexto(cifraByLine[index + i])
             ) {
-              if (!this.linhaUmLetra) {
+              console.log(linha, index)
+              if (!cifra.linhaUmLetra) {
                 cifra.linhaUmLetra = cifraByLine[index + i];
-              } else {
+              } else if (cifra.linhaUmLetra && !cifra.linhaDoisLetra) {
                 cifra.linhaDoisLetra = cifraByLine[index + i];
+              } else {
+                encontrouFim = true;
+                break;
               }
             }
 
@@ -113,7 +118,7 @@ class Cifra {
       }
     });
 
-    console.log(cifras)
+    console.log(cifras);
     return cifras;
   }
 
@@ -212,8 +217,8 @@ class Cifra {
           this.linhaCifraMobile.push(
             this.linhaCifra.substring(
               divisaoPartesLetraCifra[0][index]
-              ? divisaoPartesLetraCifra[0][index][0]
-              : divisaoPartesLetraCifra[2][index][0],
+                ? divisaoPartesLetraCifra[0][index][0]
+                : divisaoPartesLetraCifra[2][index][0],
               divisaoPartesLetraCifra[0][index]
                 ? divisaoPartesLetraCifra[0][index][1]
                 : divisaoPartesLetraCifra[2][index][1]

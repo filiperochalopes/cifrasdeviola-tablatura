@@ -1,6 +1,11 @@
 let bancoDeCifras = [
   {
     tom: "E",
+    nome: "a_volta_que_o_mundo_da",
+    afinacao: "E",
+  },
+  {
+    tom: "E",
     nome: "a_sereia_e_o_nego_dagua",
     afinacao: "E",
   },
@@ -23,11 +28,6 @@ let bancoDeCifras = [
     tom: "Am",
     nome: "boate_azul",
     afinacao: "D",
-  },
-  {
-    tom: "E",
-    nome: "a_volta_que_o_mundo_da",
-    afinacao: "E",
   },
   {
     tom: "E",
