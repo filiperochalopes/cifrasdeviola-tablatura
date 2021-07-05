@@ -196,8 +196,8 @@ class Tablatura {
           a[i] = new Notacao({
             ...notacao,
             print:
-              `(${diegoHackChangeBemois(printString)})` ||
-              diegoHackChangeBemois(notacao.print),
+              `(${printString})` ||
+              notacao.print,
           });
         }
         a[i] = new Notacao({
@@ -281,7 +281,7 @@ class Tablatura {
         if (notacao.match.match(new RegExp(/(\d+p\d+)|(\d+h\d+)/, "g"))) {
           // Analisa se a notação está correta
           const numberArray = notacao.match.split(/\D/);
-          let print = diegoHackChangeBemois(notacao.print);
+          let print = notacao.print;
           if (parseInt(numberArray[0]) > parseInt(numberArray[1])) {
             print = print.replace(/\D/, "p");
           } else {

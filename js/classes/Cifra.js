@@ -128,7 +128,7 @@ class Cifra {
       if (this.linhaCifra) {
         let tmpCifraHtml = this.linhaCifra.replace(
           new RegExp(/[ABCDEFG]([\w#()]{1,7})?/, "g"),
-          "<span class='cifra'>$&</span>"
+          string => `<span class='cifra'>${diegoHackChangeBemois(string)}</span>`
         );
         html += `${tmpCifraHtml}\n`;
       }
