@@ -21,7 +21,7 @@ class Tablatura {
     this.notacoesOriginais = this.notacoes;
   }
 
-  alterarAfinacao(apelidoAfinacao, PREMIUM=appState.premium) {
+  alterarAfinacao(apelidoAfinacao, PREMIUM = appState.premium) {
     const afinacao = afinacoesPorApelido[apelidoAfinacao];
 
     // restaura tom original
@@ -195,7 +195,9 @@ class Tablatura {
           let printString = Cifra.alteraNota(nota, variacaoTom);
           a[i] = new Notacao({
             ...notacao,
-            print: `(${printString})` || notacao.print,
+            print:
+              `(${diegoHackChangeBemois(printString)})` ||
+              diegoHackChangeBemois(notacao.print),
           });
         }
         a[i] = new Notacao({
@@ -279,7 +281,7 @@ class Tablatura {
         if (notacao.match.match(new RegExp(/(\d+p\d+)|(\d+h\d+)/, "g"))) {
           // Analisa se a notação está correta
           const numberArray = notacao.match.split(/\D/);
-          let print = notacao.print;
+          let print = diegoHackChangeBemois(notacao.print);
           if (parseInt(numberArray[0]) > parseInt(numberArray[1])) {
             print = print.replace(/\D/, "p");
           } else {
