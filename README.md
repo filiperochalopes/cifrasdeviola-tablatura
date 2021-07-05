@@ -46,6 +46,7 @@ Primeiramente é necessário importar todos os arquivos de script em sua página
 <script src="js/config.js"></script>
 <script src="js/classes/Notacao.js"></script>
 <script src="js/classes/Tablatura.js"></script>
+<script src="js/classes/Cifra.js"></script>
 <script src="js/main.js"></script>
 ```
 
@@ -66,14 +67,18 @@ Para configurações existe um arquivo chamado `config.js`. O estado do app (no 
 
 ## Funções importantes
 
+### `renderDependingOnWindowSize`
+
+Função utilizada em `config.js` para estabelecer os *breakpoints* utilizados na quebra de tablaturas (o número indicado significa o número de notações por lina) e letra (número de caracteres com correção de palavras, ou seja, se uma palavra encerra no meio da quebra, ela é escrita até o final)
+
 ### `Tablatura.extrairDaCifra(Afinacao, string): [Tablatura]`
 
 Utilizado para extrair de uma cifra em string as tablaturas e salvála no `appState.tablaturas` como uma lista de objetos Tablatura
 
-### `Tablatura.render(modo)`
-
-Captura todas as tablaturas da cifra armazenadas em appState.tablaturas e renderiza na tela html. O uso de `modo='mobile'` permite a quebra de tablaturas compridas para melhor legibilidade em dispositivos móveis.
-
 ### `tablatura.alterarTom(notacaoTom)`
 
 Método da instância de `Tablatura`. Altera o da tablatura instanciada de `appState.tomOriginal` para o tom em `notacaoTom`
+
+### `cifra.alterarTom(notacaoTom)`
+
+Método da instância de `Cifra`. Altera o da tablatura instanciada de `appState.tomOriginal` para o tom em `notacaoTom`
