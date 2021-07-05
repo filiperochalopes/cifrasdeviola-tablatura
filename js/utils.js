@@ -52,10 +52,15 @@ const diegoHackChangeBemois = (string) => {
     Bb: "A#",
   };
 
-  let result;
-  Object.entries(map).forEach((note) => {
-    result = string.replace(note[0], note[1]);
-  });
+  let result = string;
+  if (string) {
+    Object.entries(map).forEach((note) => {
+      if (string.includes(note[0])) {
+        result = string.replace(note[0], note[1]);
+      }
+    });
+  }
 
+  console.log(string, result);
   return result;
 };
