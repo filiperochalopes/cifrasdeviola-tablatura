@@ -69,7 +69,7 @@ $(document).ready(function () {
       novoTom = novoTom[0][0];
     }
     appState.tom = novoTom;
-    $("input#tom").val(appState.tom);
+    $("input#tom").val(diegoHackChangeBemois(appState.tom));
     // Alterando tom e renderizando no corpo do elemento #cifra
     appState.tablaturas.forEach((tablatura) => tablatura.alterarTom());
     appState.cifras.forEach((cifra) => cifra.alterarTom());
@@ -86,7 +86,7 @@ $(document).ready(function () {
       novoTom = novoTom[0][0];
     }
     appState.tom = novoTom;
-    $("input#tom").val(appState.tom);
+    $("input#tom").val(diegoHackChangeBemois(appState.tom));
     // Alterando tom e renderizando no corpo do elemento #cifra
     appState.tablaturas.forEach((tablatura) => tablatura.alterarTom());
     appState.cifras.forEach((cifra) => cifra.alterarTom());
@@ -103,7 +103,7 @@ $(document).ready(function () {
       novoTom = appState.tom;
     }
     appState.tom = novoTom;
-    $("input#tom").val(appState.tom);
+    $("input#tom").val(diegoHackChangeBemois(appState.tom));
     // Alterando tom e renderizando no corpo do elemento #cifra
     appState.tablaturas.forEach((tablatura) => tablatura.alterarTom());
     appState.cifras.forEach((cifra) => cifra.alterarTom());

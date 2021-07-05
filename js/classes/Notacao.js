@@ -20,7 +20,7 @@ class Notacao {
     tablaturaIndex,
     cordaIndex,
     print,
-    estatico
+    estatico,
   }) {
     this.index = index;
     this.match = match;
@@ -30,7 +30,8 @@ class Notacao {
     this.tablaturaIndex = tablaturaIndex;
     this.cordaIndex = cordaIndex;
     this.estatico = estatico || false;
-    this.print = print || this.match;
+    this.print =
+      diegoHackChangeBemois(print) || diegoHackChangeBemois(this.match);
   }
 
   /** Extrai os matches das notações, detalhando mais eles na diferenciação de notas e efeitos */
